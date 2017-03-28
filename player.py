@@ -2,20 +2,24 @@ import random
 from config import BLACK, WHITE
 from game_ai import GameArtificialIntelligence
 from heuristic import OthelloHeuristic
+from game_state_logger import Logger
 
 class Player(object):
 
-    def __init__(self, color, time_limit=-1, gui=None):
+    def __init__(self, color, time_limit=-1, gui=None, headless=False):
         self.color = color
         self.time_limit = time_limit
         self.gui = gui
+        self.headless = headless
 
     def get_move(self):
         raise NotImplementedError("function get_move must be implemented by subclass")
 
     def apply_move(self, move):
-        self.gui.flash_move(move, self.color)
+        if not self.headless:
+            self.gui.flash_move(move, self.color)
         self.current_board.apply_move(move, self.color)
+        Logger.report(color=self.color, original_board=self.current_board)
 
     def set_current_board(self, board):
         self.current_board = board
@@ -27,7 +31,8 @@ class HumanPlayer(Player):
 
     def get_move(self):
         valid_moves = self.current_board.get_valid_moves(self.color)
-        self.gui.highlight_valid_moves(valid_moves)
+        if not self.headless:
+            self.gui.highlight_valid_moves(valid_moves)
         while True:
             move = self.gui.get_move_by_mouse()
             if move in valid_moves:
@@ -44,8 +49,8 @@ class RandomPlayer(Player):
 
 class ComputerPlayer(Player):
 
-    def __init__(self, color="black", time_limit=5, gui=None):
-        super(ComputerPlayer, self).__init__(color, time_limit, gui)
+    def __init__(self, color="black", time_limit=5, gui=None, headless=False):
+        super(ComputerPlayer, self).__init__(color, time_limit, gui, headless)
         heuristic = OthelloHeuristic()
         self.ai = GameArtificialIntelligence(heuristic.evaluate)
 

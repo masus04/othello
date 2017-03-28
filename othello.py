@@ -5,12 +5,19 @@ import player
 import numpy as np
 from gui import Gui
 from config import BLACK, WHITE, HUMAN, COMPUTER
+from game_state_logger import Logger
 
 class Othello:
 
+    headless = True
+
     def __init__(self):
-        self.gui = Gui()
-        self.setup_game()
+        if self.headless:
+            self.setup_headless_game()
+        else:
+            self.gui = Gui()
+            self.setup_game()
+        self.setup_headless_game()
 
     def read_board_file(self, file_name):
         f = open(file_name)
@@ -31,6 +38,16 @@ class Othello:
 
         return board
 
+    def setup_headless_game(self):
+        self.headless = True
+        # player one, same as in game_state_logger.py
+
+        self.now_playing = player.ComputerPlayer(BLACK, 5, headless=self.headless)
+        # player two, same as in game_state_logger.py
+        self.other_player = player.ComputerPlayer(WHITE, 5, headless=self.headless)
+        self.board = board.Board()
+
+
     def setup_game(self):
         options = self.gui.show_options()
         if options['player_1'] == COMPUTER:
@@ -47,21 +64,28 @@ class Othello:
             self.board = board.Board()
 
     def run(self):
-        self.gui.show_game(self.board)
+        if not self.headless:
+            self.gui.show_game(self.board)
         while True:
             winner = self.board.game_won()
             if winner is not None:
+                Logger.report_winner(winner)
                 break
             self.now_playing.set_current_board(self.board)
             if self.board.get_valid_moves(self.now_playing.color) != []:
                 self.board = self.now_playing.get_move()
-            self.gui.update(self.board, self.other_player)
+            if not self.headless:
+                self.gui.update(self.board, self.other_player)
             self.now_playing, self.other_player = self.other_player, self.now_playing
-        self.gui.show_winner(winner, self.board)
+        if not self.headless:
+            self.gui.show_winner(winner, self.board)
         self.restart()
 
     def restart(self):
-        self.setup_game()
+        if self.headless:
+            self.setup_headless_game()
+        else:
+            self.setup_game()
         self.run()
 
 def main():
