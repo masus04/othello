@@ -10,6 +10,7 @@ from game_state_logger import Logger
 class Othello:
 
     headless = True
+    number_of_games = 50
 
     def __init__(self):
         if self.headless:
@@ -41,11 +42,11 @@ class Othello:
     def setup_headless_game(self):
         self.headless = True
         # player one, same as in game_state_logger.py
-
         self.now_playing = player.ComputerPlayer(BLACK, 5, headless=self.headless)
         # player two, same as in game_state_logger.py
         self.other_player = player.ComputerPlayer(WHITE, 5, headless=self.headless)
         self.board = board.Board()
+        Logger.set_player_names([self.now_playing.name, self.other_player.name])
 
 
     def setup_game(self):
@@ -63,7 +64,7 @@ class Othello:
         else:
             self.board = board.Board()
 
-    def run(self):
+    def run(self, games=1):
         if not self.headless:
             self.gui.show_game(self.board)
         while True:
@@ -79,18 +80,19 @@ class Othello:
             self.now_playing, self.other_player = self.other_player, self.now_playing
         if not self.headless:
             self.gui.show_winner(winner, self.board)
-        self.restart()
+        self.restart(games - 1)
 
-    def restart(self):
-        if self.headless:
-            self.setup_headless_game()
-        else:
-            self.setup_game()
-        self.run()
+    def restart(self, games):
+        if games > 0:
+            if self.headless:
+                self.setup_headless_game()
+            else:
+                self.setup_game()
+            self.run(games)
 
 def main():
     game = Othello()
-    game.run()
+    game.run(Othello.number_of_games)
 
 if __name__ == '__main__':
     main()

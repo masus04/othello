@@ -6,6 +6,8 @@ from game_state_logger import Logger
 
 class Player(object):
 
+    name = "Player"
+
     def __init__(self, color, time_limit=-1, gui=None, headless=False):
         self.color = color
         self.time_limit = time_limit
@@ -29,6 +31,8 @@ class Player(object):
 
 class HumanPlayer(Player):
 
+    name = "HumanPlayer"
+
     def get_move(self):
         valid_moves = self.current_board.get_valid_moves(self.color)
         if not self.headless:
@@ -42,12 +46,16 @@ class HumanPlayer(Player):
 
 class RandomPlayer(Player):
 
+    name = "RandomPlayer"
+
     def get_move(self):
         x = random.sample(self.current_board.get_valid_moves(self.color), 1)
         self.apply_move(x[0])
         return self.current_board
 
 class ComputerPlayer(Player):
+
+    name = "ComputerPlayer"
 
     def __init__(self, color="black", time_limit=5, gui=None, headless=False):
         super(ComputerPlayer, self).__init__(color, time_limit, gui, headless)

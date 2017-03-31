@@ -308,3 +308,5 @@ class Board:
                 else:
                     new_row.append(-1)
             representation.append(new_row)
+
+        return representation
