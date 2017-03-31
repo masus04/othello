@@ -295,3 +295,16 @@ class Board:
                     print ' ',
                 print '|',
             print
+
+    def get_representation(self, color):
+        representation = []
+        for row in self.board:
+            new_row = []
+            for field in row:
+                if field == EMPTY:
+                    new_row.append(0)
+                elif field == color:
+                    new_row.append(1)
+                else:
+                    new_row.append(-1)
+            representation.append(new_row)

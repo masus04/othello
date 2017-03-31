@@ -1,5 +1,7 @@
 from config import BLACK, WHITE
 import copy
+import h5py
+import os
 
 class Logger:
 
@@ -32,6 +34,7 @@ class Logger:
         print('Player %s won' % winner_color)
         print('Number of Moves: %i' % len(cls.player_one_moves))
 
+    @classmethod
     def write_to_file(self):
         # TODO: Implement this
         pass
