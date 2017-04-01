@@ -72,6 +72,6 @@ class ComputerPlayer(Player):
         start = datetime.datetime.now()
         move = self.ai.move_search(self.current_board, self.time_limit, self.color, other_color)
         delta = datetime.datetime.now() - start
-        print >> sys.stderr, "Time taken:", delta
+        # print >> sys.stderr, "Time taken:", delta
         self.apply_move(move)
         return self.current_board

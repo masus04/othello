@@ -51,9 +51,7 @@ class Logger:
             hdf["loss"].create_dataset("%s_loss_%i" % (game_name, i), data=np.array(move.get_representation(looser_color)))
             i += 1
 
-        print('Game Over')
-        print('Player %s won' % winner_color)
-        print('Number of Moves: %i' % len(cls.player_moves[0]))
+        print('-- | Player %s won | --' % winner_color)
 
         cls.player_moves = [[], []]
 
