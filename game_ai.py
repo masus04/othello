@@ -3,6 +3,7 @@ import sys
 import random
 from Queue import PriorityQueue
 
+
 class GameArtificialIntelligence(object):
 
     def __init__(self, heuristic_fn):
@@ -35,7 +36,7 @@ class GameArtificialIntelligence(object):
                 # print "Got to Depth:", depth
             # else:
                 # print "Cutoff at depth", depth
-        print "Chose move: %s at depth: %s" % (move, depth)
+        # print "Chose move: %s at depth: %s" % (move, depth)
         return move
 
     def alpha_beta_wrapper(self, node, depth, current_player, other_player):

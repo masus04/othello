@@ -1,6 +1,7 @@
 import sys
 from config import BLACK, WHITE, EMPTY
 
+
 class OthelloHeuristic(object):
 
     WIN = sys.maxint - 1000
@@ -14,6 +15,36 @@ class OthelloHeuristic(object):
     START_GAME = 0
     MID_GAME = 1
     END_GAME = 2
+
+    DEFAULT_STRATEGY = 0
+    SAVE_STONES_STRATEGY = 1
+    PURE_MOBILITY_STRATEGY = 2
+    GREEDY_STRATEGY = 3
+
+    def __init__(self, strategy=DEFAULT_STRATEGY):
+        if strategy == self.SAVE_STONES_STRATEGY:
+            self.PIECE_COUNT_FACTOR = [0, 0, 1]
+            self.CORNER_FACTOR = [0, 0, 0]
+            self.MOBILITY_FACTOR = [0, 0, 0]
+            self.EDGE_FACTOR = [0, 0, 0]
+            self.CORNER_EDGE_FACTOR = [1, 1, 0]
+            self.STABILITY_FACTOR = [0, 0, 0]
+
+        if strategy == self.PURE_MOBILITY_STRATEGY:
+            self.PIECE_COUNT_FACTOR = [0, 0, 1]
+            self.CORNER_FACTOR = [0, 0, 0]
+            self.MOBILITY_FACTOR = [1, 1, 0]
+            self.EDGE_FACTOR = [0, 0, 0]
+            self.CORNER_EDGE_FACTOR = [0, 0, 0]
+            self.STABILITY_FACTOR = [0, 0, 0]
+
+        if strategy == self.GREEDY_STRATEGY:
+            self.PIECE_COUNT_FACTOR = [1, 1, 1]
+            self.CORNER_FACTOR = [0, 0, 0]
+            self.MOBILITY_FACTOR = [0, 0, 0]
+            self.EDGE_FACTOR = [0, 0, 0]
+            self.CORNER_EDGE_FACTOR = [0, 0, 0]
+            self.STABILITY_FACTOR = [0, 0, 0]
 
     def evaluate(self, board, current_player, other_player):
 

@@ -4,6 +4,7 @@ from game_ai import GameArtificialIntelligence
 from heuristic import OthelloHeuristic
 from game_state_logger import Logger
 
+
 class Player(object):
 
     name = "Player"
@@ -57,9 +58,9 @@ class ComputerPlayer(Player):
 
     name = "ComputerPlayer"
 
-    def __init__(self, color="black", time_limit=5, gui=None, headless=False):
+    def __init__(self, color="black", time_limit=5, gui=None, headless=False, strategy=OthelloHeuristic.DEFAULT_STRATEGY):
         super(ComputerPlayer, self).__init__(color, time_limit, gui, headless)
-        heuristic = OthelloHeuristic()
+        heuristic = OthelloHeuristic(strategy)
         self.ai = GameArtificialIntelligence(heuristic.evaluate)
 
     # Is Random For Now

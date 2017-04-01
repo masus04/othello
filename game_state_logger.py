@@ -3,6 +3,7 @@ import h5py
 import os
 import numpy as np
 
+
 class Logger:
     """
     Generates a hdf5 file and adds every game state of every played game to it

@@ -6,12 +6,14 @@ import numpy as np
 from gui import Gui
 from config import BLACK, WHITE, HUMAN, COMPUTER
 from game_state_logger import Logger
+from heuristic import OthelloHeuristic
+
 
 class Othello:
 
     headless = True
-    number_of_games = 50
-    timeout = 5;
+    number_of_games = 5
+    timeout = 2;
 
     def __init__(self):
         if self.headless:
@@ -20,6 +22,31 @@ class Othello:
             self.gui = Gui()
             self.setup_game()
         self.setup_headless_game()
+
+    def setup_headless_game(self):
+        self.headless = True
+        # player one, same as in game_state_logger.py
+        self.now_playing = player.ComputerPlayer(color=BLACK, time_limit=self.timeout, headless=self.headless, strategy=OthelloHeuristic.SAVE_STONES_STRATEGY)
+        # player two, same as in game_state_logger.py
+        self.other_player = player.ComputerPlayer(color=WHITE, time_limit=self.timeout, headless=self.headless, strategy=OthelloHeuristic.PURE_MOBILITY_STRATEGY)
+        self.board = board.Board()
+        Logger.set_player_names([self.now_playing.name, self.other_player.name])
+
+
+    def setup_game(self):
+        options = self.gui.show_options()
+        if options['player_1'] == COMPUTER:
+            self.now_playing = player.ComputerPlayer(BLACK, int(options['player_1_time']), self.gui)
+        else:
+            self.now_playing = player.HumanPlayer(BLACK, gui=self.gui)
+        if options['player_2'] == COMPUTER:
+            self.other_player = player.ComputerPlayer(WHITE, int(options['player_2_time']), self.gui)
+        else:
+            self.other_player = player.HumanPlayer(WHITE, gui=self.gui)
+        if options.has_key('load_file'):
+            self.board = board.Board(self.read_board_file(options['load_file']))
+        else:
+            self.board = board.Board()
 
     def read_board_file(self, file_name):
         f = open(file_name)
@@ -39,31 +66,6 @@ class Othello:
             self.now_playing, self.other_player = self.other_player, self.now_playing
 
         return board
-
-    def setup_headless_game(self):
-        self.headless = True
-        # player one, same as in game_state_logger.py
-        self.now_playing = player.ComputerPlayer(BLACK, self.timeout, headless=self.headless)
-        # player two, same as in game_state_logger.py
-        self.other_player = player.ComputerPlayer(WHITE, self.timeout, headless=self.headless)
-        self.board = board.Board()
-        Logger.set_player_names([self.now_playing.name, self.other_player.name])
-
-
-    def setup_game(self):
-        options = self.gui.show_options()
-        if options['player_1'] == COMPUTER:
-            self.now_playing = player.ComputerPlayer(BLACK, int(options['player_1_time']), self.gui)
-        else:
-            self.now_playing = player.HumanPlayer(BLACK, gui=self.gui)
-        if options['player_2'] == COMPUTER:
-            self.other_player = player.ComputerPlayer(WHITE, int(options['player_2_time']), self.gui)
-        else:
-            self.other_player = player.HumanPlayer(WHITE, gui=self.gui)
-        if options.has_key('load_file'):
-            self.board = board.Board(self.read_board_file(options['load_file']))
-        else:
-            self.board = board.Board()
 
     def run(self, games=1):
         print "Game started: %s vs %s, time limit: %is" % (self.now_playing.name, self.other_player.name, self.timeout)
