@@ -12,8 +12,8 @@ from heuristic import OthelloHeuristic
 class Othello:
 
     headless = True
-    number_of_games = 5
-    timeout = 2;
+    number_of_games = 50
+    timeout = 5;
 
     def __init__(self):
         if self.headless:
