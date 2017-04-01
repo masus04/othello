@@ -7,12 +7,12 @@ from gui import Gui
 from config import BLACK, WHITE, HUMAN, COMPUTER
 from game_state_logger import Logger
 from heuristic import OthelloHeuristic
-
+from random import randint
 
 class Othello:
 
     headless = True
-    number_of_games = 50
+    number_of_games = 100
     timeout = 5;
 
     def __init__(self):
@@ -26,9 +26,9 @@ class Othello:
     def setup_headless_game(self):
         self.headless = True
         # player one, same as in game_state_logger.py
-        self.now_playing = player.ComputerPlayer(color=BLACK, time_limit=self.timeout, headless=self.headless, strategy=OthelloHeuristic.SAVE_STONES_STRATEGY)
+        self.now_playing = player.ComputerPlayer(color=BLACK, time_limit=self.timeout, headless=self.headless, strategy=randint(0,2))
         # player two, same as in game_state_logger.py
-        self.other_player = player.ComputerPlayer(color=WHITE, time_limit=self.timeout, headless=self.headless, strategy=OthelloHeuristic.PURE_MOBILITY_STRATEGY)
+        self.other_player = player.ComputerPlayer(color=WHITE, time_limit=self.timeout, headless=self.headless, strategy=randint(0,2))
         self.board = board.Board()
         Logger.set_player_names([self.now_playing.name, self.other_player.name])
 
