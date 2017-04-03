@@ -10,11 +10,12 @@ from game_state_logger import Logger
 from heuristic import OthelloHeuristic
 from random import randint
 
+
 class Othello:
 
     headless = True
     number_of_games = 100
-    timeout = 5;
+    timeout = 1;
 
     def __init__(self):
         if self.headless:

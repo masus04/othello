@@ -2,6 +2,7 @@ import copy
 import h5py
 import os
 import numpy as np
+from properties import uid
 
 
 class Logger:
@@ -38,18 +39,18 @@ class Logger:
 
         # Find next available index
         i = 0
-        while "%s_win_%i" % (game_name, i) in hdf['win']:
+        while "uid:_%s_%s_win_%i" % (uid, game_name, i) in hdf['win']:
             i += 1
         for move in cls.player_moves[winner_color - 1]:
-            hdf["win"].create_dataset("%s_win_%i" % (game_name, i), data=np.array(move.get_representation(winner_color)))
+            hdf["win"].create_dataset("uid:_%s_%s_win_%i" % (uid, game_name, i), data=np.array(move.get_representation(winner_color)))
             i += 1
 
         # Find next available index
         i = 0
-        while "%s_loss_%i" % (game_name, i) in hdf['loss']:
+        while "uid:_%s_%s_loss_%i" % (uid, game_name, i) in hdf['loss']:
             i += 1
         for move in cls.player_moves[looser_color - 1]:
-            hdf["loss"].create_dataset("%s_loss_%i" % (game_name, i), data=np.array(move.get_representation(looser_color)))
+            hdf["loss"].create_dataset("uid:_%s_%s_loss_%i" % (uid, game_name, i), data=np.array(move.get_representation(looser_color)))
             i += 1
 
         print('-- | Player %s won | --' % winner_color)
