@@ -2,6 +2,7 @@
 
 import board
 import player
+from deep_learning_player import DeepLearningPlayer
 import numpy as np
 from gui import Gui
 from config import BLACK, WHITE, HUMAN, COMPUTER
