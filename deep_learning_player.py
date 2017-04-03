@@ -1,4 +1,5 @@
 from player import Player
+import numpy as np
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
@@ -56,6 +57,23 @@ class Net(nn.Module):
     def train_epoch(self, optimizer, epoch):
         pass
 
+    @classmethod
+    def load_training_data(cls):
+        import h5py
+
+        hdf = h5py.File("./TrainingData/samples.hdf5", "a")
+        training_samples = [[], []]
+
+        # Add winning samples
+        training_samples[0] = ([data_set for data_set in hdf["win"].values()])
+        training_samples[1] = ([1] * len(training_samples[0]))
+
+        # Add loosing samples
+        training_samples[0].extend([data_set for data_set in hdf["loss"].values()])
+        training_samples[1].extend([0] * (len(training_samples[0]) - len(training_samples[1])))
+
+        print "Successfully loaded %i trainingsamples" % len(training_samples[0])
+        return training_samples
 
 # test network
 net = Net()
