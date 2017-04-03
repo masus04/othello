@@ -35,20 +35,32 @@ class Net(nn.Module):
 
     def __init__(self):
         super(Net, self).__init__()
-        self.conv1 = nn.Conv2d(1, 4, 2)
-        self.conv2 = nn.Conv2d(4, 8, 4)
-        self.conv3 = nn.Conv2d(8, 16, 8)
+        self.conv1 = nn.Conv2d(1, 8, 3)
+        self.conv2 = nn.Conv2d(8, 8, 3)
+        self.conv3 = nn.Conv2d(8, 12, 3)
+        self.conv4 = nn.Conv2d(12, 12, 3)
+        self.conv5 = nn.Conv2d(12, 12, 3)
+        self.conv6 = nn.Conv2d(12, 12, 3)
+        self.conv7 = nn.Conv2d(16, 16, 3)
+        self.conv8 = nn.Conv2d(16, 16, 3)
         self.fc1 = nn.Linear(16*4*4, 128)
-        self.fc2 = nn.Linear(128, 32)
-        self.fc3 = nn.Linear(32, 1)
+        self.fc2 = nn.Linear(128, 64)
+        self.fc3 = nn.Linear(64, 32)
+        self.fc4 = nn.Linear(32, 1)
 
     def forward(self):
         x = F.relu(self.conv1)
         x = F.relu(self.conv2)
         x = F.relu(self.conv3)
+        x = F.relu(self.conv4)
+        x = F.relu(self.conv5)
+        x = F.relu(self.conv6)
+        x = F.relu(self.conv7)
+        x = F.relu(self.conv8)
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
         x = F.relu(self.fc3(x))
+        x = self.fc4(x)
         return x
 
     def train_model(self, optimizer):
@@ -72,7 +84,7 @@ class Net(nn.Module):
         training_samples[0].extend([data_set for data_set in hdf["loss"].values()])
         training_samples[1].extend([0] * (len(training_samples[0]) - len(training_samples[1])))
 
-        print "Successfully loaded %i trainingsamples" % len(training_samples[0])
+        print "Successfully loaded %i training samples" % len(training_samples[0])
         return training_samples
 
 # test network
