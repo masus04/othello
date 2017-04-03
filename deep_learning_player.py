@@ -1,6 +1,7 @@
 from player import Player
 import torch.nn as nn
 import torch.nn.functional as F
+import torch.optim as optim
 
 # WARNING: pyTorch only supports mini batches!
 # see http://pytorch.org/tutorials/beginner/blitz/neural_networks_tutorial.html for details
@@ -15,12 +16,19 @@ class DeepLearningPlayer(Player):
     def get_move(self):
         moves = self.current_board.get_valid_moves(self.color)
 
+        # predict value for each possible move
         for move in moves:
             pass
 
     def init_network(self):
-        net = Net()
-        print(net)
+        learning_rate = 0.01
+        momentum = 0.5
+        model = Net()
+        print(model)
+
+        optimizer = optim.SGD(model.parameters(), lr=learning_rate, momentum=momentum)
+        model.train_model(optimizer)
+
 
 class Net(nn.Module):
 
@@ -41,6 +49,13 @@ class Net(nn.Module):
         x = F.relu(self.fc2(x))
         x = F.relu(self.fc3(x))
         return x
+
+    def train_model(self, optimizer):
+        pass
+
+    def train_epoch(self, optimizer, epoch):
+        pass
+
 
 # test network
 net = Net()
