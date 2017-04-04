@@ -2,7 +2,7 @@
 
 import board
 import player
-from deep_learning_player import DeepLearningPlayer
+# from deep_learning_player import DeepLearningPlayer
 import numpy as np
 from gui import Gui
 from config import BLACK, WHITE, HUMAN, COMPUTER
@@ -15,7 +15,7 @@ class Othello:
 
     headless = True
     number_of_games = 100
-    timeout = 1;
+    timeout = 5;
 
     def __init__(self):
         if self.headless:

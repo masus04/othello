@@ -2,6 +2,7 @@ import datetime
 import sys
 import random
 from Queue import PriorityQueue
+from game_state_logger import Logger
 
 
 class GameArtificialIntelligence(object):
@@ -37,6 +38,7 @@ class GameArtificialIntelligence(object):
             # else:
                 # print "Cutoff at depth", depth
         # print "Chose move: %s at depth: %s" % (move, depth)
+        Logger.report_depth(depth)
         return move
 
     def alpha_beta_wrapper(self, node, depth, current_player, other_player):

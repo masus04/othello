@@ -23,6 +23,8 @@ class Logger:
     # player_moves[player][move]
     player_moves = [[], []]
     player_names = None
+    min_depth = 100
+    depth_sum = 0
 
     @classmethod
     def report(cls, color, original_board):
@@ -53,9 +55,17 @@ class Logger:
             hdf["loss"].create_dataset("uid:_%s_%s_loss_%i" % (uid, game_name, i), data=np.array(move.get_representation(looser_color)))
             i += 1
 
-        print('-- | Player %s won | --' % winner_color)
+        print "-- | Player %s won | --" % winner_color
+        print "Average depth: %i | Min depth: %i" % (cls.depth_sum / len(cls.player_moves[winner_color - 1]), cls.min_depth)
 
         cls.player_moves = [[], []]
+        cls.depth_sum = 0
+
+    @classmethod
+    def report_depth(cls, depth):
+        cls.depth_sum = cls.depth_sum + depth
+        cls.min_depth = min(cls.min_depth, depth)
+
 
     @classmethod
     def init_hdf5(cls):
