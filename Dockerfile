@@ -1,4 +1,4 @@
-M python:2
+FROM python:2
 COPY . /src
 
 RUN pip install numpy
