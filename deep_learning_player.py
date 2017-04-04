@@ -48,6 +48,8 @@ class Net(nn.Module):
         self.fc3 = nn.Linear(64, 32)
         self.fc4 = nn.Linear(32, 1)
 
+        self.training_data = self.load_training_data()
+
     def forward(self):
         x = F.relu(self.conv1)
         x = F.relu(self.conv2)
@@ -76,16 +78,21 @@ class Net(nn.Module):
         hdf = h5py.File("./TrainingData/samples.hdf5", "a")
         training_samples = [[], []]
 
-        # Add winning samples
-        training_samples[0] = ([data_set for data_set in hdf["win"].values()])
+        training_samples[0] = cls.retrieve_training_data(hdf["win"])
         training_samples[1] = ([1] * len(training_samples[0]))
 
-        # Add loosing samples
-        training_samples[0].extend([data_set for data_set in hdf["loss"].values()])
+        training_samples[0].extend(cls.retrieve_training_data(hdf["loss"]))
         training_samples[1].extend([0] * (len(training_samples[0]) - len(training_samples[1])))
+
+        cls.retrieve_training_data(hdf["loss"])
 
         print "Successfully loaded %i training samples" % len(training_samples[0])
         return training_samples
+
+    @classmethod
+    def retrieve_training_data(cls, group):
+        return [game_state for game_state in (game_group for game_group in group.values())]
+
 
 # test network
 net = Net()

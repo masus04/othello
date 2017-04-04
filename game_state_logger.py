@@ -41,19 +41,35 @@ class Logger:
 
         # Find next available index
         i = 0
-        while "uid:_%s_%s_win_%i" % (uid, game_name, i) in hdf['win']:
-            i += 1
-        for move in cls.player_moves[winner_color - 1]:
-            hdf["win"].create_dataset("uid:_%s_%s_win_%i" % (uid, game_name, i), data=np.array(move.get_representation(winner_color)))
-            i += 1
+        while i>=0 :
+            group_name = "uid:_%s_%s_win_%i_min_depth:%i" % (uid, game_name, i, cls.min_depth)
+            if group_name in hdf['win']:
+                i += 1
+            else:
+                game_group = hdf["win"].create_group(group_name)
+                i = 0
+
+                for move in cls.player_moves[winner_color -1]:
+                    game_group.create_dataset("game_state_%i" % i, data=np.array(move.get_representation(winner_color)))
+                    i += 1
+
+                i = -1 # break condition
 
         # Find next available index
         i = 0
-        while "uid:_%s_%s_loss_%i" % (uid, game_name, i) in hdf['loss']:
-            i += 1
-        for move in cls.player_moves[looser_color - 1]:
-            hdf["loss"].create_dataset("uid:_%s_%s_loss_%i" % (uid, game_name, i), data=np.array(move.get_representation(looser_color)))
-            i += 1
+        while i>=0 :
+            group_name = "uid:_%s_%s_loss_%i_min_depth:%i" % (uid, game_name, i, cls.min_depth)
+            if group_name in hdf['loss']:
+                i += 1
+            else:
+                game_group = hdf["loss"].create_group(group_name)
+                i = 0
+
+                for move in cls.player_moves[winner_color -1]:
+                    game_group.create_dataset("game_state_%i" % i, data=np.array(move.get_representation(winner_color)))
+                    i += 1
+
+                i = -1 # break condition
 
         print "-- | Player %s won | --" % winner_color
         print "Average depth: %i | Min depth: %i" % (cls.depth_sum / len(cls.player_moves[winner_color - 1]), cls.min_depth)
@@ -63,7 +79,7 @@ class Logger:
 
     @classmethod
     def report_depth(cls, depth):
-        cls.depth_sum = cls.depth_sum + depth
+        cls.depth_sum += depth
         cls.min_depth = min(cls.min_depth, depth)
 
 
