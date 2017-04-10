@@ -50,15 +50,15 @@ class Net(nn.Module):
 
         self.training_data = self.load_training_data()
 
-    def forward(self):
-        x = F.relu(self.conv1)
-        x = F.relu(self.conv2)
-        x = F.relu(self.conv3)
-        x = F.relu(self.conv4)
-        x = F.relu(self.conv5)
-        x = F.relu(self.conv6)
-        x = F.relu(self.conv7)
-        x = F.relu(self.conv8)
+    def forward(self, x):
+        x = F.relu(self.conv1(x))
+        x = F.relu(self.conv2(x))
+        x = F.relu(self.conv3(x))
+        x = F.relu(self.conv4(x))
+        x = F.relu(self.conv5(x))
+        x = F.relu(self.conv6(x))
+        x = F.relu(self.conv7(x))
+        x = F.relu(self.conv8(x))
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
         x = F.relu(self.fc3(x))
