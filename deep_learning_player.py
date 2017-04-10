@@ -21,14 +21,14 @@ class DeepLearningPlayer(Player):
         for move in moves:
             pass
 
+        self.apply_move(moves[0])
+        return self.current_board
+
     def init_network(self):
-        learning_rate = 0.01
-        momentum = 0.5
         model = Net()
         print(model)
 
-        optimizer = optim.SGD(model.parameters(), lr=learning_rate, momentum=momentum)
-        model.train_model(optimizer)
+        model.train_model()
 
 
 class Net(nn.Module):
@@ -65,8 +65,15 @@ class Net(nn.Module):
         x = self.fc4(x)
         return x
 
-    def train_model(self, optimizer):
-        pass
+    def train_model(self):
+        learning_rate = 0.01
+        momentum = 0.5
+        optimizer = optim.SGD(self.parameters(), lr=learning_rate, momentum=momentum)
+        self.train()
+        for training_game in self.training_data:
+            game_states = training_game[0]
+            label = training_game[1]
+            print "sample_len: %i, label: %i" % (len(game_states), label)
 
     def train_epoch(self, optimizer, epoch):
         pass
@@ -76,24 +83,22 @@ class Net(nn.Module):
         import h5py
 
         hdf = h5py.File("./TrainingData/samples.hdf5", "a")
-        training_samples = [[], []]
 
-        training_samples[0] = cls.retrieve_training_data(hdf["win"])
-        training_samples[1] = ([1] * len(training_samples[0]))
+        samples = cls.retrieve_training_data(hdf["win"])
+        labels = ([1] * len(samples))
 
-        training_samples[0].extend(cls.retrieve_training_data(hdf["loss"]))
-        training_samples[1].extend([0] * (len(training_samples[0]) - len(training_samples[1])))
+        samples.extend(cls.retrieve_training_data(hdf["loss"]))
+        labels.extend([0] * (len(samples) - len(labels)))
 
-        cls.retrieve_training_data(hdf["loss"])
+        training_data = zip(samples, labels)
 
-        print "Successfully loaded %i training samples" % len(training_samples[0])
-        return training_samples
+        print "Successfully loaded %i training samples" % len(training_data)
+        return training_data
 
     @classmethod
     def retrieve_training_data(cls, group):
-        return [game_state for game_state in (game_group for game_group in group.values())]
+        arr = []
+        for game_group in group.values():
+            arr.append([game_state.value for game_state in game_group.values()])
 
-
-# test network
-net = Net()
-print(net)
+        return arr
