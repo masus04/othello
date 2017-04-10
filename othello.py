@@ -2,20 +2,28 @@
 
 import board
 import player
+# from deep_learning_player import DeepLearningPlayer
 import numpy as np
 from gui import Gui
 from config import BLACK, WHITE, HUMAN, COMPUTER
 from game_state_logger import Logger
 from heuristic import OthelloHeuristic
 from random import randint
+import properties
 
 class Othello:
 
+    # Default values, they are overridden by values in the properties file
     headless = True
     number_of_games = 100
     timeout = 5;
 
     def __init__(self):
+        if hasattr(properties, "timeout"):
+            self.timeout = properties.timeout
+        if hasattr(properties, "number_of_games"):
+            self.number_of_games = properties.number_of_games
+
         if self.headless:
             self.setup_headless_game()
         else:
