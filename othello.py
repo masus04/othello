@@ -19,11 +19,12 @@ class Othello:
     number_of_games = 100
     timeout = 5;
 
+    if hasattr(properties, "timeout"):
+        timeout = properties.timeout
+    if hasattr(properties, "games"):
+        number_of_games = properties.games
+
     def __init__(self):
-        if hasattr(properties, "timeout"):
-            self.timeout = properties.timeout
-        if hasattr(properties, "number_of_games"):
-            self.number_of_games = properties.number_of_games
 
         if self.headless:
             self.setup_headless_game()
