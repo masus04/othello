@@ -42,7 +42,7 @@ class Logger:
         # Find next available index
         i = 0
         while i>=0 :
-            group_name = "uid:_%s_%s_win_%i_min_depth:%i" % (uid, game_name, i, cls.min_depth)
+            group_name = "uid:_%s_%s_win_%i_min_depth:%i" % (uid, format(game_name, "02d"), i, cls.min_depth)
             if group_name in hdf['win']:
                 i += 1
             else:
@@ -50,7 +50,7 @@ class Logger:
                 i = 0
 
                 for move in cls.player_moves[winner_color -1]:
-                    game_group.create_dataset("game_state_%i" % i, data=np.array(move.get_representation(winner_color)))
+                    game_group.create_dataset("game_state_%i" % format(i, "02d"), data=np.array(move.get_representation(winner_color)))
                     i += 1
 
                 i = -1 # break condition
@@ -58,7 +58,7 @@ class Logger:
         # Find next available index
         i = 0
         while i>=0 :
-            group_name = "uid:_%s_%s_loss_%i_min_depth:%i" % (uid, game_name, i, cls.min_depth)
+            group_name = "uid:_%s_%s_loss_%i_min_depth:%i" % (uid, game_name, format(i, "02d"), cls.min_depth)
             if group_name in hdf['loss']:
                 i += 1
             else:
@@ -66,7 +66,7 @@ class Logger:
                 i = 0
 
                 for move in cls.player_moves[winner_color -1]:
-                    game_group.create_dataset("game_state_%i" % i, data=np.array(move.get_representation(winner_color)))
+                    game_group.create_dataset("game_state_%i" % format(i, "02d"), data=np.array(move.get_representation(winner_color)))
                     i += 1
 
                 i = -1 # break condition
