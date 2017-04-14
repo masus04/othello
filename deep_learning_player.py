@@ -86,20 +86,6 @@ class Net(nn.Module):
             loss.backward()
             optimizer.step()
 
-        '''for index, training_game in enumerate(self.samples):
-
-            # change batch size here
-            for game_state in training_game:
-                sample, target = Variable(FloatTensor([[game_state]])), Variable(FloatTensor(self.labels[index]))
-
-                optimizer.zero_grad()
-                output = self(sample)
-
-                criterion = nn.MSELoss()
-                loss = criterion(output, target)
-                loss.backward()
-                optimizer.step()'''
-
     def train_epoch(self, optimizer, epoch):
         pass
 
