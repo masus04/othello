@@ -16,6 +16,10 @@ class DeepLearningPlayer(Player):
         super(DeepLearningPlayer, self).__init__(color, time_limit, gui, headless)
 
         self.model = Net()
+
+        if torch.cuda.is_available():
+            self.model.cuda()
+
         print(self.model)
 
         # model.train_model()
@@ -60,23 +64,31 @@ class Net(nn.Module):
     def num_flat_features(self):
         return self.conv_to_linear_params_size
 
-    def train_model(self):
-
-        from data_handler import DataHandler
+    def train_model(self, epochs=1):
 
         learning_rate = 0.01
         momentum = 0.5
         # batch_size > 32 for all samples
         batch_size = 1000
 
-        self.training_data = DataHandler.get_training_data(batch_size=batch_size)
-
-        optimizer = optim.SGD(self.parameters(), lr=learning_rate, momentum=momentum)
+        self.optimizer = optim.SGD(self.parameters(), lr=learning_rate, momentum=momentum)
 
         self.train()
 
-        for data in self.training_data:
-            sample, target = Variable(FloatTensor([[data[0]]])), Variable(FloatTensor([data[1]]))
+        for i in range(epochs):
+            self.train_epoch(optimizer=self.optimizer, batch_size=batch_size)
+            print "Successively trained %i epochs" % (i+1)
+
+    def train_epoch(self, optimizer, batch_size):
+
+        from data_handler import DataHandler
+        training_data = DataHandler.get_training_data(batch_size=batch_size)
+
+        for data in training_data:
+            sample, target = FloatTensor([[data[0]]]), FloatTensor([data[1]])
+            if torch.cuda.is_available():
+                sample, target = sample.cuda(), target.cuda()
+            sample, target = Variable(sample), Variable(target)
 
             optimizer.zero_grad()
             output = self(sample)
@@ -86,10 +98,7 @@ class Net(nn.Module):
             loss.backward()
             optimizer.step()
 
-    def train_epoch(self, optimizer, epoch):
-        pass
 
-
-'''print "Test DeepLearningPlayer"
+print "Test DeepLearningPlayer"
 player = DeepLearningPlayer(color=1, time_limit=5, headless=True)
-player.model.train_model()'''
+player.model.train_model(3)

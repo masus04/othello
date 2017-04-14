@@ -17,7 +17,7 @@ class DataHandler:
         cls.games_won = [game.values() for game in hdf["win"].values()]
         cls.games_lost = [game.values() for game in hdf["loss"].values()]
 
-        print "Successfully loaded %i games" % (len(cls.games_won) + len(cls.games_lost))
+        #print "Successfully loaded %i games" % (len(cls.games_won) + len(cls.games_lost))
 
     @classmethod
     def get_training_data(cls, batch_size=1000, shuffle=False):
@@ -38,7 +38,7 @@ class DataHandler:
         if shuffle:
             random.shuffle(training_data)
 
-        print "successfully loaded %i training samples" % len(training_data)
+        #print "successfully loaded %i training samples" % len(training_data)
         return training_data
 
 
