@@ -5,6 +5,8 @@ import torch.nn.functional as F
 import torch.optim as optim
 from torch.autograd import Variable
 from torch import FloatTensor
+from copy import deepcopy
+from data_handler import DataHandler
 
 # WARNING: pyTorch only supports mini batches!
 # see http://pytorch.org/tutorials/beginner/blitz/neural_networks_tutorial.html for details
@@ -12,9 +14,10 @@ from torch import FloatTensor
 
 class DeepLearningPlayer(Player):
 
-    def __init__(self, color="black", time_limit=5, gui=None, headless=False):
-        super(DeepLearningPlayer, self).__init__(color, time_limit, gui, headless)
+    name = "DeepLearningPlayer"
 
+    def __init__(self, color="black", time_limit=5, gui=None, headless=False, epochs=3, batch_size=1000):
+        super(DeepLearningPlayer, self).__init__(color, time_limit, gui, headless)
         self.model = Net()
 
         if torch.cuda.is_available():
@@ -22,17 +25,32 @@ class DeepLearningPlayer(Player):
 
         print(self.model)
 
-        # model.train_model()
+        try:
+            self.model = DataHandler.load_weights(self.name)
+        except Exception:
+            self.model.train_model(epochs=epochs, batch_size=batch_size)
+            DataHandler.store_weights(player_name=self.name, model=self.model)
 
     def get_move(self):
         moves = self.current_board.get_valid_moves(self.color)
 
         # predict value for each possible move
-        for move in moves:
-            pass
+        predictions = [(self.__predict_move__(move), move) for move in moves]
 
-        self.apply_move(moves[0])
+        print "Chose move with prediction [%s]" % max(predictions)[0]
+        self.apply_move(max(predictions)[1])
         return self.current_board
+
+    def __predict_move__(self, move):
+        board = deepcopy(self.current_board)
+        board.apply_move(move, self.color)
+
+        sample = FloatTensor([[board.get_representation(self.color)]])
+        if torch.cuda.is_available():
+            sample = sample.cuda()
+        sample = Variable(sample)
+
+        return self.model.forward(sample)
 
 
 class Net(nn.Module):
@@ -64,12 +82,11 @@ class Net(nn.Module):
     def num_flat_features(self):
         return self.conv_to_linear_params_size
 
-    def train_model(self, epochs=1):
+    def train_model(self, epochs=1, batch_size=1000):
+        print "training Model"
 
         learning_rate = 0.01
         momentum = 0.5
-        # batch_size > 32 for all samples
-        batch_size = 1000
 
         self.optimizer = optim.SGD(self.parameters(), lr=learning_rate, momentum=momentum)
 
@@ -81,7 +98,6 @@ class Net(nn.Module):
 
     def train_epoch(self, optimizer, batch_size):
 
-        from data_handler import DataHandler
         training_data = DataHandler.get_training_data(batch_size=batch_size)
 
         for data in training_data:
@@ -99,6 +115,11 @@ class Net(nn.Module):
             optimizer.step()
 
 
-print "Test DeepLearningPlayer"
-player = DeepLearningPlayer(color=1, time_limit=5, headless=True)
-player.model.train_model(3)
+'''print "Test DeepLearningPlayer"
+player = DeepLearningPlayer(color=1, time_limit=5, headless=True, epochs=1, batch_size=1)
+from board import Board
+board = Board()
+player.set_current_board(board)
+move = player.get_move()
+print "DeepLearningPlayer's move: "
+print move.get_representation(1)'''

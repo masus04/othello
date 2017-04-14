@@ -1,4 +1,7 @@
 import random
+import h5py
+import os
+import torch
 
 class DataHandler:
 
@@ -10,7 +13,6 @@ class DataHandler:
 
     @classmethod
     def __load_training_data__(cls):
-        import h5py
 
         hdf = h5py.File("./TrainingData/samples.hdf5", "a")
 
@@ -41,7 +43,16 @@ class DataHandler:
         #print "successfully loaded %i training samples" % len(training_data)
         return training_data
 
+    @classmethod
+    def store_weights(cls, player_name, model):
+        if not os.path.exists("./Weights"):
+            os.makedirs("./Weights")
+
+        torch.save(model, "./Weights/%s.pth" % player_name)
+
+    @classmethod
+    def load_weights(cls, player_name):
+        model = torch.load("./Weights/%s.pth" % player_name)
+        return model
 
 DataHandler.__load_training_data__()
-data = DataHandler.get_training_data(1)
-data
