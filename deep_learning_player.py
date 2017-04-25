@@ -23,6 +23,7 @@ class DeepLearningPlayer(Player):
 
         if torch.cuda.is_available():
             self.model.cuda()
+            print "CUDA activated"
 
         # print(self.model)
 
