@@ -58,7 +58,7 @@ class DataHandler:
     @classmethod
     def format_time(cls, seconds):
         m,s = divmod(seconds, 60)
-        h,m = divmod(m, 60)
+        h,m = divmod(m, 24)
         total_time = ""
         if h>0:
             total_time += "%ih " % h

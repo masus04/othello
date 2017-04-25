@@ -105,7 +105,7 @@ class Net(nn.Module):
         for i in range(epochs):
             epoch_time = time.time()
             self.train_epoch(optimizer=self.optimizer, batch_size=batch_size)
-            print "Successively trained %i epochs (epoch timer: %is)" % (i+1, time.time()-epoch_time)
+            print "Successively trained %i epochs (epoch timer: %i)" % (i+1, DataHandler.format_time(time.time()-epoch_time))
 
         total_time = DataHandler.format_time(time.time()-start_time)
 
