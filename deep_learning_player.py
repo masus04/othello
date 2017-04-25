@@ -97,11 +97,12 @@ class Net(nn.Module):
     def train_model(self, epochs=1, batch_size=100):
         print "training Model"
 
-        learning_rate = 0.1
+        learning_rate = 0.01
         momentum = 0.5
         start_time = time.time()
 
-        self.optimizer = optim.SGD(self.parameters(), lr=learning_rate, momentum=momentum)
+        if not self.optimizer:
+            self.optimizer = optim.SGD(self.parameters(), lr=learning_rate, momentum=momentum)
 
         self.train()
 
@@ -141,3 +142,4 @@ player.set_current_board(board)
 move = player.get_move()
 print "DeepLearningPlayer's move: "
 print move.get_representation(1)'''
+DeepLearningPlayer.train_model(epochs=100, batch_size=100)
