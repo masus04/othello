@@ -143,4 +143,4 @@ player.set_current_board(board)
 move = player.get_move()
 print "DeepLearningPlayer's move: "
 print move.get_representation(1)'''
-DeepLearningPlayer.train_model(epochs=100, batch_size=100)
+DeepLearningPlayer.train_model(epochs=20, batch_size=100)

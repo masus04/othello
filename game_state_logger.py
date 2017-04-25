@@ -7,7 +7,7 @@ from properties import uid
 # Use first argument as uid
 try:
     uid = sys.argv[1]
-except TypeError:
+except IndexError:
     pass
 
 
