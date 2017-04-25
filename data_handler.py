@@ -55,18 +55,18 @@ class DataHandler:
         model = torch.load("./Weights/%s.pth" % player_name)
         return model
 
+    @classmethod
+    def format_time(cls, seconds):
+        m,s = divmod(seconds, 60)
+        h,m = divmod(m, 60)
+        total_time = ""
+        if h>0:
+            total_time += "%ih " % h
+        if m>0:
+            total_time += "%im " % m
+        total_time += "%is" % s
 
-def format_time(seconds):
-    m,s = divmod(seconds, 60)
-    h,m = divmod(m, 60)
-    total_time = ""
-    if h>0:
-        total_time += "%ih " % h
-    if m>0:
-        total_time += "%im " % m
-    total_time += "%is" % s
-
-    return total_time
+        return total_time
 
 
 DataHandler.__load_training_data__()

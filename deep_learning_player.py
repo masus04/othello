@@ -6,7 +6,7 @@ import torch.optim as optim
 from torch.autograd import Variable
 from torch import FloatTensor
 from copy import deepcopy
-from data_handler import DataHandler, format_time
+from data_handler import DataHandler
 import time
 
 # WARNING: pyTorch only supports mini batches!
@@ -107,7 +107,7 @@ class Net(nn.Module):
             self.train_epoch(optimizer=self.optimizer, batch_size=batch_size)
             print "Successively trained %i epochs (epoch timer: %is)" % (i+1, time.time()-epoch_time)
 
-        total_time = format_time(time.time()-start_time)
+        total_time = DataHandler.format_time(time.time()-start_time)
 
         print "Finished training of %i epochs in %s" % (epochs, total_time)
 
