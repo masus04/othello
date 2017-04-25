@@ -3,6 +3,7 @@ import h5py
 import os
 import torch
 
+
 class DataHandler:
 
     WIN = 1
@@ -28,6 +29,11 @@ class DataHandler:
         :batch_size: the number of board states to be randomly chosen from each game"""
 
         # --------------------------------------------------------
+        try:
+            cls.games_won and cls.games_lost
+        except Exception:
+            cls.__load_training_data__()
+
         games = zip(cls.games_won, cls.games_lost)
 
         training_data = []

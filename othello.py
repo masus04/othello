@@ -4,7 +4,7 @@ import board
 import player
 from deep_learning_player import DeepLearningPlayer
 import numpy as np
-from gui import Gui
+# from gui import Gui
 from config import BLACK, WHITE, HUMAN, COMPUTER
 from game_state_logger import Logger
 from heuristic import OthelloHeuristic
@@ -29,7 +29,7 @@ class Othello:
         if self.headless:
             self.setup_headless_game()
         else:
-            self.gui = Gui()
+            #self.gui = Gui()
             self.setup_game()
         self.setup_headless_game()
 
