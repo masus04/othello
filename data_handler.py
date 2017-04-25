@@ -22,7 +22,7 @@ class DataHandler:
         #print "Successfully loaded %i games" % (len(cls.games_won) + len(cls.games_lost))
 
     @classmethod
-    def get_training_data(cls, batch_size=1000, shuffle=False):
+    def get_training_data(cls, batch_size=100, shuffle=False):
         """get a list of training samples with their corresponding training labels in the following structure:
         [[training_sample 8x8, training_label], [training_sample 8x8, training_label], ..]
         :batch_size: the number of board states to be randomly chosen from each game"""
@@ -68,5 +68,20 @@ class DataHandler:
 
         return total_time
 
+    @classmethod
+    def merge_samples(cls):
+        merged_file = h5py.File("./TrainingData/samples.hdf5", "a")
 
-DataHandler.__load_training_data__()
+        sample_files = os.listdir("./TrainingData")
+        for file_name in sample_files:
+            sample_file = h5py.File("./TrainingData/" + file_name)
+
+            for game in sample_file["win"].values():
+                if not game.name in merged_file["win"]:
+                    game.copy(source=game, dest=merged_file["win"], name=game.name)
+
+            for game in sample_file["loss"].values():
+                if not game.name in merged_file["loss"]:
+                    game.copy(source=game, dest=merged_file["loss"], name=game.name)
+
+DataHandler.merge_samples()

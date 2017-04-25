@@ -17,20 +17,23 @@ class DeepLearningPlayer(Player):
 
     name = "DeepLearningPlayer"
 
-    def __init__(self, color="black", time_limit=5, gui=None, headless=False, epochs=5, batch_size=1000):
+    def __init__(self, color="black", time_limit=5, gui=None, headless=False, epochs=5, batch_size=100):
         super(DeepLearningPlayer, self).__init__(color, time_limit, gui, headless)
         self.model = Net()
 
         if torch.cuda.is_available():
             self.model.cuda()
 
-        print(self.model)
+        # print(self.model)
 
         try:
             self.model = DataHandler.load_weights(self.name)
         except Exception:
-            self.model.train_model(epochs=epochs, batch_size=batch_size)
-            DataHandler.store_weights(player_name=self.name, model=self.model)
+            self.train_model(epochs=epochs, batch_size=batch_size)
+
+    def train_model(self, epochs, batch_size):
+        self.model.train_model(epochs=epochs, batch_size=batch_size)
+        DataHandler.store_weights(player_name=self.name, model=self.model)
 
     def get_move(self):
         moves = self.current_board.get_valid_moves(self.color)
@@ -51,7 +54,7 @@ class DeepLearningPlayer(Player):
             sample = sample.cuda()
         sample = Variable(sample)
 
-        return self.model.forward(sample)
+        return self.model(sample)
 
 
 class Net(nn.Module):
@@ -91,10 +94,10 @@ class Net(nn.Module):
     def num_flat_features(self):
         return self.conv_to_linear_params_size
 
-    def train_model(self, epochs=1, batch_size=1000):
+    def train_model(self, epochs=1, batch_size=100):
         print "training Model"
 
-        learning_rate = 0.01
+        learning_rate = 0.1
         momentum = 0.5
         start_time = time.time()
 
@@ -105,7 +108,7 @@ class Net(nn.Module):
         for i in range(epochs):
             epoch_time = time.time()
             self.train_epoch(optimizer=self.optimizer, batch_size=batch_size)
-            print "Successively trained %i epochs (epoch timer: %i)" % (i+1, DataHandler.format_time(time.time()-epoch_time))
+            print "Successively trained %s epochs (epoch timer: %s)" % (i+1, DataHandler.format_time(time.time()-epoch_time))
 
         total_time = DataHandler.format_time(time.time()-start_time)
 
@@ -130,8 +133,8 @@ class Net(nn.Module):
             optimizer.step()
 
 
-print "Test DeepLearningPlayer"
-player = DeepLearningPlayer(color=1, time_limit=5, headless=True, epochs=2)
+# print "Test DeepLearningPlayer"
+# player = DeepLearningPlayer(color=1, time_limit=5, headless=True, epochs=2)
 '''from board import Board
 board = Board()
 player.set_current_board(board)
