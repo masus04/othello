@@ -1,8 +1,14 @@
 import copy
 import h5py
-import os
+import os, sys
 import numpy as np
 from properties import uid
+
+# Use first argument as uid
+try:
+    uid = sys.argv[1]
+except TypeError:
+    pass
 
 
 class Logger:
