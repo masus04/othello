@@ -14,25 +14,32 @@ import math
 # WARNING: pyTorch only supports mini batches!
 # see http://pytorch.org/tutorials/beginner/blitz/neural_networks_tutorial.html for details
 
+#################################################################################
+#  Only replace the deep player import in othello.py with the following:        #
+#  from deep_learning_player2 import DeepLearningPlayer2 as DeepLearningPlayer  #
+#################################################################################
 
-class DeepLearningPlayer(Player):
+class DeepLearningPlayer2(Player):
 
-    name = "DeepLearningPlayer"
+    name = "DeepLearningPlayer2"
 
     def __init__(self, color="black", time_limit=5, gui=None, headless=False, epochs=5, batch_size=100):
-        super(DeepLearningPlayer, self).__init__(color, time_limit, gui, headless)
+        super(DeepLearningPlayer2, self).__init__(color, time_limit, gui, headless)
         self.model = Net()
 
         if torch.cuda.is_available():
             self.model.cuda()
             print "CUDA activated"
 
-        # print(self.model)
-
+        #print(self.model)
+        #need to change the extend data handler for this model too
+        '''
         try:
             self.model = DataHandler.load_weights(self.name)
         except Exception:
-            self.train_model(epochs=epochs, batch_size=batch_size)
+           self.train_model(epochs=epochs, batch_size=batch_size)
+        '''
+        
 
     def train_model(self, epochs, batch_size):
         self.model.train_model(epochs=epochs, batch_size=batch_size)
@@ -45,6 +52,7 @@ class DeepLearningPlayer(Player):
         move = self.__predict_move__()
 
         print "Next move: " , move
+
         self.apply_move(move)
         return self.current_board
 
@@ -54,10 +62,10 @@ class DeepLearningPlayer(Player):
         sample = FloatTensor([[board.get_representation(self.color)]])
         if torch.cuda.is_available():
             sample = sample.cuda()
+        
         sample = Variable(sample)
-
-        return self.model(sample)
-
+        self.model(sample)
+        return self.model.get_next_move(sample)
 
 class Net(nn.Module):
 
@@ -81,6 +89,7 @@ class Net(nn.Module):
         self.fc6 = nn.Linear(in_features=self.conv_to_linear_params_size/64, out_features=self.conv_to_linear_params_size/64)
         self.fc7 = nn.Linear(in_features=self.conv_to_linear_params_size/64, out_features=self.conv_to_linear_params_size/64)
         self.fc8 = nn.Linear(in_features=self.conv_to_linear_params_size/64, out_features=self.conv_to_linear_params_size/64)
+        self.fc9 = nn.Linear(in_features=self.conv_to_linear_params_size/64, out_features=1)
 
     def forward(self, x):
         x = F.relu(self.conv1(x))
@@ -100,16 +109,39 @@ class Net(nn.Module):
         x = F.relu(self.fc6(x))
         x = F.relu(self.fc7(x))
         x = F.relu(self.fc8(x))
-        
+        x = F.relu(self.fc8(x))
+        x = self.fc9(x)
+        return x
+
+    def get_next_move(self, x):
+        x = F.relu(self.conv1(x))
+        x = F.relu(self.conv2(x))
+        x = F.relu(self.conv3(x))
+        x = F.relu(self.conv4(x))
+        x = F.relu(self.conv5(x))
+        x = F.relu(self.conv6(x))
+        x = F.relu(self.conv7(x))
+        x = F.relu(self.conv8(x))
+        x = x.view(-1, self.num_flat_features())
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
+        x = F.relu(self.fc3(x))
+        x = F.relu(self.fc4(x))
+        x = F.relu(self.fc5(x))
+        x = F.relu(self.fc6(x))
+        x = F.relu(self.fc7(x))
+        x = F.relu(self.fc8(x))
+        x = F.relu(self.fc8(x))
+
         #Find the index with maximum value
         max_val, max_idx = torch.topk(x, 1)
         #Convert it to double
-        max_idx = max_ind.numpy()[0]
+        max_idx = max_idx.data.numpy()[0]
         #Compute row and column for the next move from a 64 dimensional tensor
-        row = math.floor(max_idx % 8)
-        col = max_idx - row * 8
+        row = math.floor(max_idx / 8)
+        col = max_idx[0] - (row * 8)
 
-        return (row, col)
+        return (int(row),int(col))
 
     def num_flat_features(self):
         return self.conv_to_linear_params_size
@@ -144,10 +176,10 @@ class Net(nn.Module):
             if torch.cuda.is_available():
                 sample, target = sample.cuda(), target.cuda()
             sample, target = Variable(sample), Variable(target)
-
             optimizer.zero_grad()
             output = self(sample)
 
+            #Negative Log-Likelihood loss
             criterion = nn.MSELoss()
             loss = criterion(output, target)
             loss.backward()
