@@ -98,49 +98,46 @@ class Net(nn.Module):
     def train_model(self, epochs=1, batch_size=100):
         print "training Model"
 
-        learning_rate = 0.01
+        learning_rate = 0.00001
         momentum = 0.5
         start_time = time.time()
 
-        if not self.optimizer:
-            self.optimizer = optim.SGD(self.parameters(), lr=learning_rate, momentum=momentum)
+        optimizer = optim.SGD(self.parameters(), lr=learning_rate, momentum=momentum)
+        training_data = DataHandler.get_training_data(batch_size=batch_size)
 
         self.train()
 
         for i in range(epochs):
             epoch_time = time.time()
-            self.train_epoch(optimizer=self.optimizer, batch_size=batch_size)
-            print "Successively trained %s epochs (epoch timer: %s)" % (i+1, DataHandler.format_time(time.time()-epoch_time))
+            self.train_epoch(optimizer=optimizer, training_data=training_data)
+            print "Successively trained %s epochs (epoch timer: %s)" % (i+1, DataHandler.format_time(time.time() - epoch_time))
 
-        total_time = DataHandler.format_time(time.time()-start_time)
+        total_time = DataHandler.format_time(time.time() - start_time)
 
         print "Finished training of %i epochs in %s" % (epochs, total_time)
 
-    def train_epoch(self, optimizer, batch_size):
+    def train_epoch(self, optimizer, training_data):
 
-        training_data = DataHandler.get_training_data(batch_size=batch_size)
+        criterion = torch.nn.MSELoss(size_average=False)
 
-        for data in training_data:
+        for index, data in enumerate(training_data):
             sample, target = FloatTensor([[data[0]]]), FloatTensor([data[1]])
             if torch.cuda.is_available():
                 sample, target = sample.cuda(), target.cuda()
             sample, target = Variable(sample), Variable(target)
 
-            optimizer.zero_grad()
             output = self(sample)
-
-            criterion = nn.MSELoss()
             loss = criterion(output, target)
+            optimizer.zero_grad()
             loss.backward()
             optimizer.step()
 
+            print('Finished %01d:%% failure: %s' % ((100 * float(index)) / len(training_data), loss.data[0]))
 
-# print "Test DeepLearningPlayer"
-# player = DeepLearningPlayer(color=1, time_limit=5, headless=True, epochs=2)
+
 '''from board import Board
 board = Board()
 player.set_current_board(board)
 move = player.get_move()
 print "DeepLearningPlayer's move: "
 print move.get_representation(1)'''
-#DeepLearningPlayer.train_model(epochs=20, batch_size=100)
