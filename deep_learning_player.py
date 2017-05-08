@@ -8,6 +8,7 @@ from torch import FloatTensor
 from copy import deepcopy
 from data_handler import DataHandler
 import time
+from game_ai import GameArtificialIntelligence
 
 # WARNING: pyTorch only supports mini batches!
 # see http://pytorch.org/tutorials/beginner/blitz/neural_networks_tutorial.html for details
@@ -20,6 +21,7 @@ class DeepLearningPlayer(Player):
     def __init__(self, color="black", time_limit=5, gui=None, headless=False, epochs=5, batch_size=100):
         super(DeepLearningPlayer, self).__init__(color, time_limit, gui, headless)
         self.model = Net()
+        self.ai = GameArtificialIntelligence(self.evaluate_board);
 
         if torch.cuda.is_available():
             self.model.cuda()
@@ -36,14 +38,29 @@ class DeepLearningPlayer(Player):
         self.model.train_model(epochs=epochs, batch_size=batch_size)
         DataHandler.store_weights(player_name=self.name, model=self.model)
 
+    def evaluate_board(self, board, color, other_player):
+        sample = FloatTensor([[board.get_representation(color)]])
+
+        if torch.cuda.is_available():
+            sample = sample.cuda()
+        sample = Variable(sample)
+
+        return self.model(sample)
+
     def get_move(self):
-        moves = self.current_board.get_valid_moves(self.color)
+        return self.get_move_alpha_beta()
+        """moves = self.current_board.get_valid_moves(self.color)
 
         # predict value for each possible move
         predictions = [(self.__predict_move__(move), move) for move in moves]
 
         print "Chose move with prediction [%s]" % max(predictions)[0]
         self.apply_move(max(predictions)[1])
+        return self.current_board"""
+
+    def get_move_alpha_beta(self):
+        move = self.ai.move_search(self.current_board, self.time_limit, self.color, (self.color % 2) + 1)
+        self.apply_move(move)
         return self.current_board
 
     def __predict_move__(self, move):
@@ -98,26 +115,27 @@ class Net(nn.Module):
     def train_model(self, epochs=1, batch_size=100):
         print "training Model"
 
-        learning_rate = 0.00001
+        learning_rate = 0.0001
         momentum = 0.5
         start_time = time.time()
 
-        optimizer = optim.SGD(self.parameters(), lr=learning_rate, momentum=momentum)
-        training_data = DataHandler.get_training_data(batch_size=batch_size)
+        if not self.optimizer:
+            self.optimizer = optim.SGD(self.parameters(), lr=learning_rate, momentum=momentum)
 
         self.train()
 
         for i in range(epochs):
             epoch_time = time.time()
-            self.train_epoch(optimizer=optimizer, training_data=training_data)
+            self.train_epoch(optimizer=self.optimizer, batch_size=batch_size)
             print "Successively trained %s epochs (epoch timer: %s)" % (i+1, DataHandler.format_time(time.time() - epoch_time))
 
         total_time = DataHandler.format_time(time.time() - start_time)
 
         print "Finished training of %i epochs in %s" % (epochs, total_time)
 
-    def train_epoch(self, optimizer, training_data):
+    def train_epoch(self, optimizer, batch_size):
 
+        training_data = DataHandler.get_training_data(batch_size=batch_size)
         criterion = torch.nn.MSELoss(size_average=False)
 
         for index, data in enumerate(training_data):

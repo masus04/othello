@@ -18,6 +18,7 @@ class Othello:
     headless = True
     number_of_games = 100
     timeout = 5;
+    LOG = True;
 
     if hasattr(properties, "timeout"):
         timeout = properties.timeout
@@ -85,7 +86,8 @@ class Othello:
         while True:
             winner = self.board.game_won()
             if winner is not None:
-                Logger.report_winner(winner)
+                if self.LOG:
+                    Logger.report_winner(winner)
                 break
             self.now_playing.set_current_board(self.board)
             if self.board.get_valid_moves(self.now_playing.color) != []:
