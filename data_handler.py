@@ -10,6 +10,7 @@ class DataHandler:
     LOSS = 0
 
     def __init__(self):
+        print "Initializing DataHandler"
         self.__load_training_data__()
 
     @classmethod

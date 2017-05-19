@@ -152,6 +152,9 @@ class Net(nn.Module):
         print "Epoch: %s | loaded %s training samples" % (epochID, len(training_data))
         criterion = torch.nn.MSELoss(size_average=False)
 
+        accumulated_loss = 0
+        training_data_length = len(training_data)
+        percent_done = 0
         for index, data in enumerate(training_data):
             sample, target = FloatTensor([[data[0]]]), FloatTensor([data[1]])
             if torch.cuda.is_available():
@@ -163,9 +166,11 @@ class Net(nn.Module):
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
+            accumulated_loss += loss.data[0]
 
-            print('Finished %01d:%% of epoch: %s| training error: %s' % ((100 * float(index)) / len(training_data), epochID, loss.data[0]))
-
+            if percent_done - 10000 * index // training_data_length / 100 != 0:
+                percent_done = 10000 * index // training_data_length / 100
+                print('Finished %s of epoch %s| average loss: %s' % (percent_done, epochID, accumulated_loss/training_data_length))
 
 '''from board import Board
 board = Board()
