@@ -30,6 +30,7 @@ class Player(object):
     def set_time_limit(self, new_limit):
         self.time_limit = new_limit
 
+
 class HumanPlayer(Player):
 
     name = "HumanPlayer"
@@ -45,6 +46,7 @@ class HumanPlayer(Player):
         self.apply_move(move)
         return self.current_board
 
+
 class RandomPlayer(Player):
 
     name = "RandomPlayer"
@@ -53,6 +55,7 @@ class RandomPlayer(Player):
         x = random.sample(self.current_board.get_valid_moves(self.color), 1)
         self.apply_move(x[0])
         return self.current_board
+
 
 class ComputerPlayer(Player):
 
@@ -75,4 +78,14 @@ class ComputerPlayer(Player):
         delta = datetime.datetime.now() - start
         # print >> sys.stderr, "Time taken:", delta
         self.apply_move(move)
+        return self.current_board
+
+
+class RandomPlayer(Player):
+
+    name = "RandomPlayer"
+
+    def get_move(self):
+        moves = self.current_board.get_valid_moves(self.color)
+        self.apply_move(random.choice(moves))
         return self.current_board

@@ -18,7 +18,7 @@ class Othello:
     headless = True
     number_of_games = 100
     timeout = 5;
-    LOG = True;
+    LOG = False;
 
     if hasattr(properties, "timeout"):
         timeout = properties.timeout
@@ -37,7 +37,7 @@ class Othello:
     def setup_headless_game(self):
         self.headless = True
         # player one, same as in game_state_logger.py
-        self.now_playing = player.ComputerPlayer(color=BLACK, time_limit=self.timeout, headless=self.headless, strategy=3)
+        self.now_playing = player.RandomPlayer(color=BLACK, time_limit=self.timeout, headless=self.headless)
         # player two, same as in game_state_logger.py
         self.other_player = DeepLearningPlayer(color=WHITE, time_limit=self.timeout, headless=self.headless, epochs=1, batch_size=100)
         # self.other_player = DeepLearningPlayer(color=WHITE, time_limit=self.timeout, headless=self.headless)
@@ -88,6 +88,8 @@ class Othello:
             if winner is not None:
                 if self.LOG:
                     Logger.report_winner(winner)
+
+                print "-- | Player %s won | --" % winner
                 break
             self.now_playing.set_current_board(self.board)
             if self.board.get_valid_moves(self.now_playing.color) != []:

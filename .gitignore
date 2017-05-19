@@ -16,3 +16,8 @@ com_crashlytics_export_strings.xml
 crashlytics.properties
 crashlytics-build.properties
 fabric.properties
+
+# training data and weights are too big to push to git
+
+TrainingData/
+Weights/

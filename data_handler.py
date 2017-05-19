@@ -13,12 +13,12 @@ class DataHandler:
         self.load_training_data()
 
     @classmethod
-    def __load_training_data__(cls):
+    def __load_training_data__(self):
 
         hdf = h5py.File("./TrainingData/samples.hdf5", "a")
 
-        cls.games_won = [game.values() for game in hdf["win"].values()]
-        cls.games_lost = [game.values() for game in hdf["loss"].values()]
+        self.games_won = [game.values() for game in hdf["win"].values()]
+        self.games_lost = [game.values() for game in hdf["loss"].values()]
 
         # print "Successfully loaded %i games" % (len(cls.games_won) + len(cls.games_lost))
 
@@ -48,6 +48,17 @@ class DataHandler:
 
         #print "successfully loaded %i training samples" % len(training_data)
         return training_data
+
+    @classmethod
+    def get_test_data(self):
+        hdf = h5py.File("./TrainingData/test.hdf5", "a")
+
+        self.games_won = [game.values() for game in hdf["win"].values()]
+        self.games_lost = [game.values() for game in hdf["loss"].values()]
+
+        test_data = [(item.value, 1) for sublist in self.games_won for item in sublist]
+        test_data.extend([(item.value, 0) for sublist in self.games_lost for item in sublist])
+        return test_data
 
     @classmethod
     def store_weights(cls, player_name, model):
@@ -91,3 +102,4 @@ class DataHandler:
                     game.copy(source=game, dest=merged_file["loss"], name=game.name)
 
 # DataHandler.merge_samples()
+DataHandler.get_test_data()
