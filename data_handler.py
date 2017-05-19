@@ -10,7 +10,7 @@ class DataHandler:
     LOSS = 0
 
     def __init__(self):
-        self.load_training_data()
+        self.__load_training_data__()
 
     @classmethod
     def __load_training_data__(self):
@@ -20,7 +20,7 @@ class DataHandler:
         self.games_won = [game.values() for game in hdf["win"].values()]
         self.games_lost = [game.values() for game in hdf["loss"].values()]
 
-        # print "Successfully loaded %i games" % (len(cls.games_won) + len(cls.games_lost))
+        print "Successfully loaded %i games" % (len(self.games_won) + len(self.games_lost))
 
     @classmethod
     def get_training_data(cls, batch_size=100, shuffle=False):
@@ -102,4 +102,5 @@ class DataHandler:
                     game.copy(source=game, dest=merged_file["loss"], name=game.name)
 
 # DataHandler.merge_samples()
-DataHandler.get_test_data()
+# DataHandler.get_test_data()
+DataHandler()

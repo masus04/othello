@@ -34,7 +34,7 @@ class DeepLearningPlayer(Player):
         except Exception:
             self.train_model(epochs=epochs, batch_size=batch_size)
 
-    def train_model(self, epochs, batch_size):
+    def train_model(self, epochs=10, batch_size=100):
         self.model.train_model(epochs=epochs, batch_size=batch_size)
         DataHandler.store_weights(player_name=self.name, model=self.model)
 
@@ -120,15 +120,18 @@ class Net(nn.Module):
     def num_flat_features(self):
         return self.conv_to_linear_params_size
 
-    def train_model(self, epochs=1, batch_size=100):
+    def train_model(self, epochs=1, batch_size=100, continueTraining=False):
         print "training Model"
 
-        learning_rate = 0.0001
+        learning_rate = 0.001
         momentum = 0.5
         start_time = time.time()
 
         try:
-            self.optimizer
+            if continueTraining:
+                self.optimizer
+            else:
+                self.optimizer = optim.SGD(self.parameters(), lr=learning_rate, momentum=momentum)
         except AttributeError:
             self.optimizer = optim.SGD(self.parameters(), lr=learning_rate, momentum=momentum)
 
@@ -136,16 +139,17 @@ class Net(nn.Module):
 
         for i in range(epochs):
             epoch_time = time.time()
-            self.train_epoch(optimizer=self.optimizer, batch_size=batch_size)
+            self.train_epoch(optimizer=self.optimizer, batch_size=batch_size, epochID=i)
             print "Successively trained %s epochs (epoch timer: %s)" % (i+1, DataHandler.format_time(time.time() - epoch_time))
 
         total_time = DataHandler.format_time(time.time() - start_time)
 
         print "Finished training of %i epochs in %s" % (epochs, total_time)
 
-    def train_epoch(self, optimizer, batch_size):
+    def train_epoch(self, optimizer, batch_size, epochID='unknown'):
 
         training_data = DataHandler.get_training_data(batch_size=batch_size)
+        print "Epoch: %s | loaded %s training samples" % (epochID, len(training_data))
         criterion = torch.nn.MSELoss(size_average=False)
 
         for index, data in enumerate(training_data):
@@ -160,7 +164,7 @@ class Net(nn.Module):
             loss.backward()
             optimizer.step()
 
-            print('Finished %01d:%% of epoch | training error: %s' % ((100 * float(index)) / len(training_data), loss.data[0]))
+            print('Finished %01d:%% of epoch: %s| training error: %s' % ((100 * float(index)) / len(training_data), epochID, loss.data[0]))
 
 
 '''from board import Board
