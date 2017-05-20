@@ -170,7 +170,7 @@ class Net(nn.Module):
 
             if percent_done - 10000 * index // training_data_length / 100 != 0:
                 percent_done = 10000 * index // training_data_length / 100
-                print('Finished %s of epoch %s| average loss: %s' % (percent_done, epochID, accumulated_loss/training_data_length))
+                print('Finished %s% %% of epoch %s | average loss: %s' % (percent_done, epochID, accumulated_loss/training_data_length))
 
 '''from board import Board
 board = Board()
