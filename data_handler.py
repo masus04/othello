@@ -102,6 +102,6 @@ class DataHandler:
                 if not game.name in merged_file["loss"]:
                     game.copy(source=game, dest=merged_file["loss"], name=game.name)
 
-# DataHandler.merge_samples()
+DataHandler.merge_samples()
 # DataHandler.get_test_data()
-DataHandler()
+# DataHandler()

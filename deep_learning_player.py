@@ -24,7 +24,7 @@ class DeepLearningPlayer(Player):
         self.ai = GameArtificialIntelligence(self.evaluate_board);
 
         if torch.cuda.is_available():
-            self.model.cuda()
+            self.model.cuda(0)
             print "CUDA activated"
 
         # print(self.model)
@@ -42,7 +42,7 @@ class DeepLearningPlayer(Player):
         sample = FloatTensor([[board.get_representation(color)]])
 
         if torch.cuda.is_available():
-            sample = sample.cuda()
+            sample = sample.cuda(0)
         sample = Variable(sample)
 
         return self.model(sample)
@@ -69,7 +69,7 @@ class DeepLearningPlayer(Player):
 
         sample = FloatTensor([[board.get_representation(self.color)]])
         if torch.cuda.is_available():
-            sample = sample.cuda()
+            sample = sample.cuda(0)
         sample = Variable(sample)
 
         return self.model(sample)
@@ -123,7 +123,7 @@ class Net(nn.Module):
     def train_model(self, epochs=1, batch_size=100, continueTraining=False):
         print "training Model"
 
-        learning_rate = 0.001
+        learning_rate = 0.0001
         momentum = 0.5
         start_time = time.time()
 
@@ -158,7 +158,7 @@ class Net(nn.Module):
         for index, data in enumerate(training_data):
             sample, target = FloatTensor([[data[0]]]), FloatTensor([data[1]])
             if torch.cuda.is_available():
-                sample, target = sample.cuda(), target.cuda()
+                sample, target = sample.cuda(0), target.cuda(0)
             sample, target = Variable(sample), Variable(target)
 
             output = self(sample)
@@ -170,7 +170,7 @@ class Net(nn.Module):
 
             if percent_done - 10000 * index // training_data_length / 100 != 0:
                 percent_done = 10000 * index // training_data_length / 100
-                print('Finished %s% %% of epoch %s | average loss: %s' % (percent_done, epochID, accumulated_loss/training_data_length))
+                print('Finished %s of epoch %s| average loss: %s' % (percent_done, epochID, accumulated_loss/training_data_length))
 
 '''from board import Board
 board = Board()

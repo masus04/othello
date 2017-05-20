@@ -39,7 +39,7 @@ class Othello:
         # player one, same as in game_state_logger.py
         self.now_playing = player.RandomPlayer(color=BLACK, time_limit=self.timeout, headless=self.headless)
         # player two, same as in game_state_logger.py
-        self.other_player = DeepLearningPlayer(color=WHITE, time_limit=self.timeout, headless=self.headless, epochs=1, batch_size=100)
+        self.other_player = DeepLearningPlayer(color=WHITE, time_limit=self.timeout, headless=self.headless, epochs=0, batch_size=1)
         # self.other_player = DeepLearningPlayer(color=WHITE, time_limit=self.timeout, headless=self.headless)
         self.board = board.Board()
         Logger.set_player_names([self.now_playing.name, self.other_player.name])
