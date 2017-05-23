@@ -35,8 +35,9 @@ class DeepLearningPlayer(Player):
             self.train_model(epochs=epochs, batch_size=batch_size)
 
     def train_model(self, epochs=10, batch_size=100, continueTraining=False):
-        self.model.train_model(epochs=epochs, batch_size=batch_size, continueTraining=continueTraining)
+        losses = self.model.train_model(epochs=epochs, batch_size=batch_size, continueTraining=continueTraining)
         DataHandler.store_weights(player_name=self.name, model=self.model)
+        return losses
 
     def evaluate_board(self, board, color, other_player):
         sample = FloatTensor([[board.get_representation(color)]])
@@ -106,7 +107,7 @@ class Net(nn.Module):
         x = F.relu(self.fc2(x))
         x = F.relu(self.fc3(x))
         x = F.relu(self.fc4(x))
-        x = self.fc5(x)
+        x = F.sigmoid(self.fc5(x))
         return x
 
     def num_flat_features(self):
@@ -143,6 +144,7 @@ class Net(nn.Module):
         training_data = DataHandler.get_training_data(batch_size=batch_size)
         print "Epoch: %s | loaded %s training samples" % (epochID, len(training_data))
         criterion = torch.nn.MSELoss(size_average=False)
+        # criterion = torch.nn.CrossEntropyLoss(weight=None, size_average=True)
 
         accumulated_loss = 0
         average_loss = []
@@ -161,8 +163,8 @@ class Net(nn.Module):
             optimizer.step()
             accumulated_loss += loss.data[0]
 
-            if percent_done - 10000 * index // training_data_length / 100 != 0:
-                percent_done = 10000 * index // training_data_length / 100
+            if percent_done - 100 * index // training_data_length != 0:
+                percent_done = 100 * index // training_data_length
                 average_loss.append(accumulated_loss/(index+1))
                 print('Finished %s%% of epoch %s | average loss: %s' % (percent_done, epochID, accumulated_loss/(index+1)))
 
