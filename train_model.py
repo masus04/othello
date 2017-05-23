@@ -14,14 +14,16 @@ while (True):
     #while datetime.datetime.today().day % 2 != 0:
     #   time.sleep(3600)
     
-    player.train_model(epochs=1, batch_size=10)
+    losses = player.train_model(epochs=1, batch_size=10)
     print "Training successfull, took %s" % DataHandler.format_time(time.time() - start_time)
     acc = test_network(player)
-    print "Accuracy: %s" % acc
+    print "Training Error / Accuracy: %s" % acc
     accuracies.append(acc)
     plt.plot(accuracies, 'r--')
     plt.plot(accuracies, 'g^')
-    plt.ylabel('Accuracy')
+    plt.plot(losses[99::100], 'b--')
+    plt.ylabel('Training Error / Accuracy')
+    plt.xlabel('Epochs')
     plt.savefig('acc.png') 
     start_time = time.time()
 

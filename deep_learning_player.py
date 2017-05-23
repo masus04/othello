@@ -145,6 +145,7 @@ class Net(nn.Module):
         criterion = torch.nn.MSELoss(size_average=False)
 
         accumulated_loss = 0
+        average_loss = []
         training_data_length = len(training_data)
         percent_done = 0
         for index, data in enumerate(training_data):
@@ -162,7 +163,10 @@ class Net(nn.Module):
 
             if percent_done - 10000 * index // training_data_length / 100 != 0:
                 percent_done = 10000 * index // training_data_length / 100
+                average_loss.append(accumulated_loss/(index+1))
                 print('Finished %s%% of epoch %s | average loss: %s' % (percent_done, epochID, accumulated_loss/(index+1)))
+
+        return average_loss
 
 '''from board import Board
 board = Board()
