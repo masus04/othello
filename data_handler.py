@@ -71,11 +71,11 @@ class DataHandler:
     def get_test_data(self):
         hdf = h5py.File("./TrainingData/test.hdf5", "a")
 
-        self.games_won = [game.values() for game in hdf["win"].values()]
-        self.games_lost = [game.values() for game in hdf["loss"].values()]
+        games_won = [game.values() for game in hdf["win"].values()]
+        games_lost = [game.values() for game in hdf["loss"].values()]
 
-        test_data = [(item.value, 1) for sublist in self.games_won for item in sublist]
-        test_data.extend([(item.value, 0) for sublist in self.games_lost for item in sublist])
+        test_data = [(item.value, 1) for sublist in games_won for item in sublist]
+        test_data.extend([(item.value, 0) for sublist in games_lost for item in sublist])
         return test_data
 
     @classmethod
