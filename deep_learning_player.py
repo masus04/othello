@@ -79,23 +79,19 @@ class Net(nn.Module):
 
     def __init__(self):
         super(Net, self).__init__()
-        self.conv_to_linear_params_size = 256*8*8
-        self.conv1 = nn.Conv2d(in_channels=  1, out_channels= 32, kernel_size=3, padding=1)
-        self.conv2 = nn.Conv2d(in_channels= 32, out_channels= 48, kernel_size=3, padding=1)
-        self.conv3 = nn.Conv2d(in_channels= 48, out_channels= 64, kernel_size=3, padding=1)
-        self.conv4 = nn.Conv2d(in_channels= 64, out_channels= 96, kernel_size=3, padding=1)
-        self.conv5 = nn.Conv2d(in_channels= 96, out_channels=128, kernel_size=3, padding=1)
-        self.conv6 = nn.Conv2d(in_channels=128, out_channels=192, kernel_size=3, padding=1)
-        self.conv7 = nn.Conv2d(in_channels=192, out_channels=256, kernel_size=3, padding=1)
-        self.fc1 = nn.Linear(in_features=self.conv_to_linear_params_size, out_features=self.conv_to_linear_params_size/2)  # Channels x Board size (was 4x4 for some reason)
-        self.fc2 = nn.Linear(in_features=self.conv_to_linear_params_size/  2, out_features=self.conv_to_linear_params_size/  4)
-        self.fc3 = nn.Linear(in_features=self.conv_to_linear_params_size/  4, out_features=self.conv_to_linear_params_size/  8)
-        self.fc4 = nn.Linear(in_features=self.conv_to_linear_params_size/  8, out_features=self.conv_to_linear_params_size/ 16)
-        self.fc5 = nn.Linear(in_features=self.conv_to_linear_params_size/ 16, out_features=self.conv_to_linear_params_size/ 32)
-        self.fc6 = nn.Linear(in_features=self.conv_to_linear_params_size/ 32, out_features=self.conv_to_linear_params_size/ 64)
-        self.fc7 = nn.Linear(in_features=self.conv_to_linear_params_size/ 64, out_features=self.conv_to_linear_params_size/128)
-        self.fc8 = nn.Linear(in_features=self.conv_to_linear_params_size/128, out_features=self.conv_to_linear_params_size/256)
-        self.fc9 = nn.Linear(in_features=self.conv_to_linear_params_size/256, out_features=1)
+        self.conv_to_linear_params_size = 32*8*8
+        self.conv1 = nn.Conv2d(in_channels= 1, out_channels= 8, kernel_size=3, padding=1)
+        self.conv2 = nn.Conv2d(in_channels= 8, out_channels=12, kernel_size=3, padding=1)
+        self.conv3 = nn.Conv2d(in_channels=12, out_channels=16, kernel_size=3, padding=1)
+        self.conv4 = nn.Conv2d(in_channels=16, out_channels=20, kernel_size=3, padding=1)
+        self.conv5 = nn.Conv2d(in_channels=20, out_channels=24, kernel_size=3, padding=1)
+        self.conv6 = nn.Conv2d(in_channels=24, out_channels=28, kernel_size=3, padding=1)
+        self.conv7 = nn.Conv2d(in_channels=28, out_channels=32, kernel_size=3, padding=1)
+        self.fc1 = nn.Linear(in_features=self.conv_to_linear_params_size,    out_features=self.conv_to_linear_params_size/ 2)  # Channels x Board size (was 4x4 for some reason)
+        self.fc2 = nn.Linear(in_features=self.conv_to_linear_params_size/ 2, out_features=self.conv_to_linear_params_size/ 4)
+        self.fc3 = nn.Linear(in_features=self.conv_to_linear_params_size/ 4, out_features=self.conv_to_linear_params_size/16)
+        self.fc4 = nn.Linear(in_features=self.conv_to_linear_params_size/16, out_features=self.conv_to_linear_params_size/32)
+        self.fc5 = nn.Linear(in_features=self.conv_to_linear_params_size/32, out_features=1)
 
     def forward(self, x):
         x = F.relu(self.conv1(x))
@@ -110,11 +106,7 @@ class Net(nn.Module):
         x = F.relu(self.fc2(x))
         x = F.relu(self.fc3(x))
         x = F.relu(self.fc4(x))
-        x = F.relu(self.fc5(x))
-        x = F.relu(self.fc6(x))
-        x = F.relu(self.fc7(x))
-        x = F.relu(self.fc8(x))
-        x = self.fc9(x)
+        x = self.fc5(x)
         return x
 
     def num_flat_features(self):
@@ -161,16 +153,16 @@ class Net(nn.Module):
                 sample, target = sample.cuda(0), target.cuda(0)
             sample, target = Variable(sample), Variable(target)
 
+            optimizer.zero_grad()
             output = self(sample)
             loss = criterion(output, target)
-            optimizer.zero_grad()
             loss.backward()
             optimizer.step()
             accumulated_loss += loss.data[0]
 
             if percent_done - 10000 * index // training_data_length / 100 != 0:
                 percent_done = 10000 * index // training_data_length / 100
-                print('Finished %s of epoch %s| average loss: %s' % (percent_done, epochID, accumulated_loss/training_data_length))
+                print('Finished %s%% of epoch %s | average loss: %s' % (percent_done, epochID, accumulated_loss/(index+1)))
 
 '''from board import Board
 board = Board()

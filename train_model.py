@@ -11,8 +11,8 @@ player = DeepLearningPlayer(color=1, time_limit=5, headless=True, epochs=0)
 start_time = time.time()
 accuracies = []
 while (True):
-    while datetime.datetime.today().day % 2 != 0:
-        sleep(3600)
+    #while datetime.datetime.today().day % 2 != 0:
+    #   time.sleep(3600)
     
     player.train_model(epochs=1, batch_size=10)
     print "Training successfull, took %s" % DataHandler.format_time(time.time() - start_time)
