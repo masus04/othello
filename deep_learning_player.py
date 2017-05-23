@@ -34,9 +34,15 @@ class DeepLearningPlayer(Player):
         except Exception:
             self.train_model(epochs=epochs, batch_size=batch_size)
 
-    def train_model(self, epochs=10, batch_size=100, continueTraining=False):
-        losses = self.model.train_model(epochs=epochs, batch_size=batch_size, continueTraining=continueTraining)
+    def train_model(self, epochs=10, batch_size=100, continue_training=False):
+        losses = self.model.train_model(epochs=epochs, batch_size=batch_size, continueTraining=continue_training)
         DataHandler.store_weights(player_name=self.name, model=self.model)
+        return losses
+
+    def train_model_on_curriculum(self, epochs_per_stage=1, final_epoch=30, continue_training=False):
+        final_epoch = min(final_epoch, 30)
+        losses = self.model.train_model_on_curriculum(epochs_per_stage=epochs_per_stage, final_epoch=final_epoch, continue_training=continue_training)
+        DataHandler.store_weights(player_name=self.name + "_curriculum", model=self.model)
         return losses
 
     def evaluate_board(self, board, color, other_player):
@@ -113,7 +119,7 @@ class Net(nn.Module):
     def num_flat_features(self):
         return self.conv_to_linear_params_size
 
-    def train_model(self, epochs=1, batch_size=100, continueTraining=False):
+    def train_model(self, epochs=1, batch_size=100, continue_training=False):
         print "training Model"
 
         learning_rate = 0.0001
@@ -121,7 +127,7 @@ class Net(nn.Module):
         start_time = time.time()
 
         try:
-            if continueTraining:
+            if continue_training:
                 self.optimizer
             else:
                 self.optimizer = optim.SGD(self.parameters(), lr=learning_rate, momentum=momentum)
@@ -131,18 +137,34 @@ class Net(nn.Module):
         self.train()
         losses = []
         for i in range(epochs):
-            epoch_time = time.time()
-            losses.extend(self.train_epoch(optimizer=self.optimizer, batch_size=batch_size, epochID=i))
-            print "Successively trained %s epochs (epoch timer: %s)" % (i+1, DataHandler.format_time(time.time() - epoch_time))
+            training_data = DataHandler.get_training_data(batch_size=batch_size)
+            losses.extend(self.train_epoch(optimizer=self.optimizer, training_data=training_data, epoch_id=i))
 
         total_time = DataHandler.format_time(time.time() - start_time)
         print "Finished training of %i epochs in %s" % (epochs, total_time)
         return losses
 
-    def train_epoch(self, optimizer, batch_size, epochID='unknown'):
+    def train_model_on_curriculum(self, epochs_per_stage, final_epoch, continue_training=False):
+        learning_rate = 0.0001
+        momentum = 0.5
+        start_time = time.time()
 
-        training_data = DataHandler.get_training_data(batch_size=batch_size)
-        print "Epoch: %s | loaded %s training samples" % (epochID, len(training_data))
+        try:
+            if continue_training:
+                self.optimizer
+            else:
+                self.optimizer = optim.SGD(self.parameters(), lr=learning_rate, momentum=momentum)
+        except AttributeError:
+            self.optimizer = optim.SGD(self.parameters(), lr=learning_rate, momentum=momentum)
+
+        self.train()
+        losses = []
+        for i in range(final_epoch*epochs_per_stage):
+            training_data = DataHandler.get_curriculum_training_data(i/epochs_per_stage)
+            losses.extend(self.train_epoch(optimizer=self.optimizer, training_data=training_data, epoch_id=i))
+
+    def train_epoch(self, optimizer, training_data, epoch_id='unknown'):
+        epoch_time = time.time()
         criterion = torch.nn.MSELoss(size_average=False)
         # criterion = torch.nn.CrossEntropyLoss(weight=None, size_average=True)
 
@@ -166,8 +188,9 @@ class Net(nn.Module):
             if percent_done - 100 * index // training_data_length != 0:
                 percent_done = 100 * index // training_data_length
                 average_losses.append(accumulated_loss/(index+1))
-                print('Finished %s%% of epoch %s | average loss: %s' % (percent_done, epochID, accumulated_loss/(index+1)))
+                print('Finished %s%% of epoch %s | average loss: %s' % (percent_done, epoch_id, accumulated_loss/(index+1)))
 
+        print "Successively trained %s epochs (epoch timer: %s)" % (epoch_id+1, DataHandler.format_time(time.time() - epoch_time))
         return average_losses
 
 '''from board import Board

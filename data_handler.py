@@ -51,6 +51,23 @@ class DataHandler:
         return training_data
 
     @classmethod
+    def get_curriculum_training_data(cls, iteration):
+
+        training_data = []
+        try:
+            cls.games_won and cls.games_lost
+        except Exception:
+            cls.__load_training_data__()
+
+        games = zip(cls.games_won, cls.games_lost)
+
+        for game_won, game_lost in games:
+            training_data.extend([(sample.value, cls.WIN) for sample in game_won if str(iteration) in sample.name])
+            training_data.extend([(sample.value, cls.LOSS) for sample in game_lost if str(iteration) in sample.name])
+
+        return training_data
+
+    @classmethod
     def get_test_data(self):
         hdf = h5py.File("./TrainingData/test.hdf5", "a")
 
