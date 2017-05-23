@@ -129,15 +129,15 @@ class Net(nn.Module):
             self.optimizer = optim.SGD(self.parameters(), lr=learning_rate, momentum=momentum)
 
         self.train()
-
+        losses = []
         for i in range(epochs):
             epoch_time = time.time()
-            self.train_epoch(optimizer=self.optimizer, batch_size=batch_size, epochID=i)
+            losses.extend(self.train_epoch(optimizer=self.optimizer, batch_size=batch_size, epochID=i))
             print "Successively trained %s epochs (epoch timer: %s)" % (i+1, DataHandler.format_time(time.time() - epoch_time))
 
         total_time = DataHandler.format_time(time.time() - start_time)
-
         print "Finished training of %i epochs in %s" % (epochs, total_time)
+        return losses
 
     def train_epoch(self, optimizer, batch_size, epochID='unknown'):
 
@@ -147,7 +147,7 @@ class Net(nn.Module):
         # criterion = torch.nn.CrossEntropyLoss(weight=None, size_average=True)
 
         accumulated_loss = 0
-        average_loss = []
+        average_losses = []
         training_data_length = len(training_data)
         percent_done = 0
         for index, data in enumerate(training_data):
@@ -165,10 +165,10 @@ class Net(nn.Module):
 
             if percent_done - 100 * index // training_data_length != 0:
                 percent_done = 100 * index // training_data_length
-                average_loss.append(accumulated_loss/(index+1))
+                average_losses.append(accumulated_loss/(index+1))
                 print('Finished %s%% of epoch %s | average loss: %s' % (percent_done, epochID, accumulated_loss/(index+1)))
 
-        return average_loss
+        return average_losses
 
 '''from board import Board
 board = Board()
