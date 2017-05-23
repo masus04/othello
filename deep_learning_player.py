@@ -34,8 +34,8 @@ class DeepLearningPlayer(Player):
         except Exception:
             self.train_model(epochs=epochs, batch_size=batch_size)
 
-    def train_model(self, epochs=10, batch_size=100):
-        self.model.train_model(epochs=epochs, batch_size=batch_size)
+    def train_model(self, epochs=10, batch_size=100, continueTraining=False):
+        self.model.train_model(epochs=epochs, batch_size=batch_size, continueTraining=continueTraining)
         DataHandler.store_weights(player_name=self.name, model=self.model)
 
     def evaluate_board(self, board, color, other_player):

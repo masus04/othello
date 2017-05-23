@@ -14,7 +14,7 @@ while (True):
     #while datetime.datetime.today().day % 2 != 0:
     #   time.sleep(3600)
     
-    losses = player.train_model(epochs=1, batch_size=10)
+    losses = player.train_model(epochs=1, batch_size=10, continueTraining=True)
     print "Training successfull, took %s" % DataHandler.format_time(time.time() - start_time)
     acc = test_network(player)
     print "Training Error / Accuracy: %s" % acc
