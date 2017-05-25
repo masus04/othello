@@ -2,7 +2,7 @@ import random
 import h5py
 import os
 import torch
-
+import numpy
 
 class DataHandler:
 

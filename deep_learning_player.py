@@ -35,7 +35,7 @@ class DeepLearningPlayer(Player):
             self.train_model(epochs=epochs, batch_size=batch_size)
 
     def train_model(self, epochs=10, batch_size=100, continue_training=False):
-        losses = self.model.train_model(epochs=epochs, batch_size=batch_size, continueTraining=continue_training)
+        losses = self.model.train_model(epochs=epochs, batch_size=batch_size, continue_training=continue_training)
         DataHandler.store_weights(player_name=self.name, model=self.model)
         return losses
 
@@ -86,6 +86,7 @@ class Net(nn.Module):
 
     def __init__(self):
         super(Net, self).__init__()
+        '''
         self.conv_to_linear_params_size = 32*8*8
         self.conv1 = nn.Conv2d(in_channels= 1, out_channels= 8, kernel_size=3, padding=1)
         self.conv2 = nn.Conv2d(in_channels= 8, out_channels=12, kernel_size=3, padding=1)
@@ -99,8 +100,14 @@ class Net(nn.Module):
         self.fc3 = nn.Linear(in_features=self.conv_to_linear_params_size/ 4, out_features=self.conv_to_linear_params_size/16)
         self.fc4 = nn.Linear(in_features=self.conv_to_linear_params_size/16, out_features=self.conv_to_linear_params_size/32)
         self.fc5 = nn.Linear(in_features=self.conv_to_linear_params_size/32, out_features=1)
+        '''
+
+        self.fc1 = nn.Linear(in_features=64, out_features=64)
+        self.fc2 = nn.Linear(in_features=64, out_features=32)
+        self.fc3 = nn.Linear(in_features=32, out_features=1)
 
     def forward(self, x):
+        '''
         x = F.relu(self.conv1(x))
         x = F.relu(self.conv2(x))
         x = F.relu(self.conv3(x))
@@ -114,6 +121,13 @@ class Net(nn.Module):
         x = F.relu(self.fc3(x))
         x = F.relu(self.fc4(x))
         x = F.sigmoid(self.fc5(x))
+        '''
+
+        x = x.view(-1, 64)
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
+        x = F.sigmoid(self.fc3(x))
+
         return x
 
     def num_flat_features(self):
@@ -123,16 +137,15 @@ class Net(nn.Module):
         print "training Model"
 
         learning_rate = 0.0001
-        momentum = 0.5
         start_time = time.time()
 
         try:
             if continue_training:
                 self.optimizer
             else:
-                self.optimizer = optim.SGD(self.parameters(), lr=learning_rate, momentum=momentum)
+                self.optimizer = optim.SGD(self.parameters(), lr=learning_rate)
         except AttributeError:
-            self.optimizer = optim.SGD(self.parameters(), lr=learning_rate, momentum=momentum)
+            self.optimizer = optim.SGD(self.parameters(), lr=learning_rate)
 
         self.train()
         losses = []
@@ -146,22 +159,25 @@ class Net(nn.Module):
 
     def train_model_on_curriculum(self, epochs_per_stage, final_epoch, continue_training=False):
         learning_rate = 0.0001
-        momentum = 0.5
         start_time = time.time()
 
         try:
             if continue_training:
                 self.optimizer
             else:
-                self.optimizer = optim.SGD(self.parameters(), lr=learning_rate, momentum=momentum)
+                self.optimizer = optim.SGD(self.parameters(), lr=learning_rate)
         except AttributeError:
-            self.optimizer = optim.SGD(self.parameters(), lr=learning_rate, momentum=momentum)
+            self.optimizer = optim.SGD(self.parameters(), lr=learning_rate)
 
         self.train()
         losses = []
         for i in range(final_epoch*epochs_per_stage):
             training_data = DataHandler.get_curriculum_training_data(i/epochs_per_stage)
             losses.extend(self.train_epoch(optimizer=self.optimizer, training_data=training_data, epoch_id=i))
+
+            total_time = DataHandler.format_time(time.time() - start_time)
+            print "Finished training of %i epochs in %s" % (i, total_time)
+            return losses
 
     def train_epoch(self, optimizer, training_data, epoch_id='unknown'):
         epoch_time = time.time()
