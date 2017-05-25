@@ -87,24 +87,28 @@ class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
         '''
-        self.conv_to_linear_params_size = 32*8*8
-        self.conv1 = nn.Conv2d(in_channels= 1, out_channels= 8, kernel_size=3, padding=1)
-        self.conv2 = nn.Conv2d(in_channels= 8, out_channels=12, kernel_size=3, padding=1)
-        self.conv3 = nn.Conv2d(in_channels=12, out_channels=16, kernel_size=3, padding=1)
-        self.conv4 = nn.Conv2d(in_channels=16, out_channels=20, kernel_size=3, padding=1)
-        self.conv5 = nn.Conv2d(in_channels=20, out_channels=24, kernel_size=3, padding=1)
-        self.conv6 = nn.Conv2d(in_channels=24, out_channels=28, kernel_size=3, padding=1)
-        self.conv7 = nn.Conv2d(in_channels=28, out_channels=32, kernel_size=3, padding=1)
-        self.fc1 = nn.Linear(in_features=self.conv_to_linear_params_size,    out_features=self.conv_to_linear_params_size/ 2)  # Channels x Board size (was 4x4 for some reason)
-        self.fc2 = nn.Linear(in_features=self.conv_to_linear_params_size/ 2, out_features=self.conv_to_linear_params_size/ 4)
-        self.fc3 = nn.Linear(in_features=self.conv_to_linear_params_size/ 4, out_features=self.conv_to_linear_params_size/16)
-        self.fc4 = nn.Linear(in_features=self.conv_to_linear_params_size/16, out_features=self.conv_to_linear_params_size/32)
-        self.fc5 = nn.Linear(in_features=self.conv_to_linear_params_size/32, out_features=1)
+        self.conv_to_linear_params_size = 16*8*8
+        self.conv1 = nn.Conv2d(in_channels= 1, out_channels=16, kernel_size=3, padding=1)
+        self.conv2 = nn.Conv2d(in_channels=16, out_channels=16, kernel_size=3, padding=1)
+        self.conv3 = nn.Conv2d(in_channels=16, out_channels=16, kernel_size=3, padding=1)
+        self.conv4 = nn.Conv2d(in_channels=16, out_channels=16, kernel_size=3, padding=1)
+        self.conv5 = nn.Conv2d(in_channels=16, out_channels=16, kernel_size=3, padding=1)
+        self.conv6 = nn.Conv2d(in_channels=16, out_channels=16, kernel_size=3, padding=1)
+        self.conv7 = nn.Conv2d(in_channels=16, out_channels=16, kernel_size=3, padding=1)
+        self.fc1 = nn.Linear(in_features=self.conv_to_linear_params_size,    out_features=self.conv_to_linear_params_size/ 4)  # Channels x Board size (was 4x4 for some reason)
+        self.fc2 = nn.Linear(in_features=self.conv_to_linear_params_size/ 4, out_features=self.conv_to_linear_params_size/ 16)
+        self.fc3 = nn.Linear(in_features=self.conv_to_linear_params_size/ 16, out_features=1)
         '''
 
+        # '''
         self.fc1 = nn.Linear(in_features=64, out_features=64)
         self.fc2 = nn.Linear(in_features=64, out_features=32)
         self.fc3 = nn.Linear(in_features=32, out_features=1)
+        # '''
+
+        self.learning_rate = 0.01
+        self.criterion = torch.nn.MSELoss(size_average=False)
+        # self.criterion = torch.nn.CrossEntropyLoss(weight=None, size_average=True)
 
     def forward(self, x):
         '''
@@ -118,15 +122,15 @@ class Net(nn.Module):
         x = x.view(-1, self.num_flat_features())
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
-        x = F.relu(self.fc3(x))
-        x = F.relu(self.fc4(x))
-        x = F.sigmoid(self.fc5(x))
+        x = F.sigmoid(self.fc3(x))
         '''
 
+        # '''
         x = x.view(-1, 64)
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
         x = F.sigmoid(self.fc3(x))
+        # '''
 
         return x
 
@@ -136,53 +140,49 @@ class Net(nn.Module):
     def train_model(self, epochs=1, batch_size=100, continue_training=False):
         print "training Model"
 
-        learning_rate = 0.0001
-        start_time = time.time()
-
         try:
             if continue_training:
                 self.optimizer
             else:
-                self.optimizer = optim.SGD(self.parameters(), lr=learning_rate)
+                self.optimizer = optim.SGD(self.parameters(), lr=self.learning_rate)
         except AttributeError:
-            self.optimizer = optim.SGD(self.parameters(), lr=learning_rate)
+            self.optimizer = optim.SGD(self.parameters(), lr=self.learning_rate)
 
         self.train()
         losses = []
+        start_time = time.time()
         for i in range(epochs):
             training_data = DataHandler.get_training_data(batch_size=batch_size)
             losses.extend(self.train_epoch(optimizer=self.optimizer, training_data=training_data, epoch_id=i))
 
         total_time = DataHandler.format_time(time.time() - start_time)
-        print "Finished training of %i epochs in %s" % (epochs, total_time)
+        print "Finished training of %i epochs in %s" % (epochs+1, total_time)
         return losses
 
     def train_model_on_curriculum(self, epochs_per_stage, final_epoch, continue_training=False):
-        learning_rate = 0.0001
-        start_time = time.time()
 
         try:
             if continue_training:
                 self.optimizer
             else:
-                self.optimizer = optim.SGD(self.parameters(), lr=learning_rate)
+                self.optimizer = optim.SGD(self.parameters(), lr=self.learning_rate)
         except AttributeError:
-            self.optimizer = optim.SGD(self.parameters(), lr=learning_rate)
+            self.optimizer = optim.SGD(self.parameters(), lr=self.learning_rate)
 
         self.train()
         losses = []
-        for i in range(final_epoch*epochs_per_stage):
-            training_data = DataHandler.get_curriculum_training_data(i/epochs_per_stage)
-            losses.extend(self.train_epoch(optimizer=self.optimizer, training_data=training_data, epoch_id=i))
+        start_time = time.time()
+        for epoch in range(final_epoch*epochs_per_stage):
+            training_data = get_dummy_training_data((16000 * 60 / 1000)) # 10% of training set size
+            # training_data = DataHandler.get_curriculum_training_data(epoch/epochs_per_stage)
+            losses.extend(self.train_epoch(optimizer=self.optimizer, training_data=training_data, epoch_id=epoch))
 
-            total_time = DataHandler.format_time(time.time() - start_time)
-            print "Finished training of %i epochs in %s" % (i, total_time)
-            return losses
+        total_time = DataHandler.format_time(time.time() - start_time)
+        print "Finished training of %i epochs in %s" % (epoch+1, total_time)
+        return losses
 
     def train_epoch(self, optimizer, training_data, epoch_id='unknown'):
         epoch_time = time.time()
-        criterion = torch.nn.MSELoss(size_average=False)
-        # criterion = torch.nn.CrossEntropyLoss(weight=None, size_average=True)
 
         accumulated_loss = 0
         average_losses = []
@@ -196,7 +196,7 @@ class Net(nn.Module):
 
             optimizer.zero_grad()
             output = self(sample)
-            loss = criterion(output, target)
+            loss = self.criterion(output, target)
             loss.backward()
             optimizer.step()
             accumulated_loss += loss.data[0]
@@ -209,9 +209,7 @@ class Net(nn.Module):
         print "Successively trained %s epochs (epoch timer: %s)" % (epoch_id+1, DataHandler.format_time(time.time() - epoch_time))
         return average_losses
 
-'''from board import Board
-board = Board()
-player.set_current_board(board)
-move = player.get_move()
-print "DeepLearningPlayer's move: "
-print move.get_representation(1)'''
+
+import numpy
+def get_dummy_training_data(sample_size):
+        return [(numpy.array([[i%2]*8]*8), i%2) for i in range(sample_size)]
