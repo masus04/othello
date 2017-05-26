@@ -86,7 +86,7 @@ class Net(nn.Module):
 
     def __init__(self):
         super(Net, self).__init__()
-        '''
+        # '''
         self.conv_to_linear_params_size = 16*8*8
         self.conv1 = nn.Conv2d(in_channels= 1, out_channels=16, kernel_size=3, padding=1)
         self.conv2 = nn.Conv2d(in_channels=16, out_channels=16, kernel_size=3, padding=1)
@@ -98,20 +98,20 @@ class Net(nn.Module):
         self.fc1 = nn.Linear(in_features=self.conv_to_linear_params_size,    out_features=self.conv_to_linear_params_size/ 4)  # Channels x Board size (was 4x4 for some reason)
         self.fc2 = nn.Linear(in_features=self.conv_to_linear_params_size/ 4, out_features=self.conv_to_linear_params_size/ 16)
         self.fc3 = nn.Linear(in_features=self.conv_to_linear_params_size/ 16, out_features=1)
-        '''
-
         # '''
+
+        '''
         self.fc1 = nn.Linear(in_features=64, out_features=64)
         self.fc2 = nn.Linear(in_features=64, out_features=32)
         self.fc3 = nn.Linear(in_features=32, out_features=1)
-        # '''
+        '''
 
         self.learning_rate = 0.01
         self.criterion = torch.nn.MSELoss(size_average=False)
         # self.criterion = torch.nn.CrossEntropyLoss(weight=None, size_average=True)
 
     def forward(self, x):
-        '''
+        # '''
         x = F.relu(self.conv1(x))
         x = F.relu(self.conv2(x))
         x = F.relu(self.conv3(x))
@@ -123,14 +123,14 @@ class Net(nn.Module):
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
         x = F.sigmoid(self.fc3(x))
-        '''
-
         # '''
+
+        '''
         x = x.view(-1, 64)
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
         x = F.sigmoid(self.fc3(x))
-        # '''
+        '''
 
         return x
 
@@ -173,8 +173,8 @@ class Net(nn.Module):
         losses = []
         start_time = time.time()
         for epoch in range(final_epoch*epochs_per_stage):
-            training_data = get_dummy_training_data((16000 * 60 / 1000)) # 10% of training set size
-            # training_data = DataHandler.get_curriculum_training_data(epoch/epochs_per_stage)
+            # training_data = get_dummy_training_data((16000 * 60 / 10)) # 10% of training set size
+            training_data = DataHandler.get_curriculum_training_data(epoch/epochs_per_stage)
             losses.extend(self.train_epoch(optimizer=self.optimizer, training_data=training_data, epoch_id=epoch))
 
         total_time = DataHandler.format_time(time.time() - start_time)
@@ -204,7 +204,7 @@ class Net(nn.Module):
             if percent_done - 100 * index // training_data_length != 0:
                 percent_done = 100 * index // training_data_length
                 average_losses.append(accumulated_loss/(index+1))
-                print('Finished %s%% of epoch %s | average loss: %s' % (percent_done, epoch_id, accumulated_loss/(index+1)))
+                print('Finished %s%% of epoch %s | average loss: %s' % (percent_done, epoch_id+1, accumulated_loss/(index+1)))
 
         print "Successively trained %s epochs (epoch timer: %s)" % (epoch_id+1, DataHandler.format_time(time.time() - epoch_time))
         return average_losses
