@@ -97,7 +97,7 @@ class Logger:
             os.makedirs("./TrainingData")
 
         # Open / create hdf5 file
-        hdf = h5py.File("./TrainingData/samples.hdf5", "a")
+        hdf = h5py.File(("./TrainingData/samples_%s.hdf5" % uid), "a")
 
         # Initialize groups (folders)
         if not 'win' in hdf.keys():
