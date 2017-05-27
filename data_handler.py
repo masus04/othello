@@ -69,7 +69,7 @@ class DataHandler:
 
     @classmethod
     def get_test_data(self):
-        hdf = h5py.File("./TrainingData/test.hdf5", "a")
+        hdf = h5py.File("./TrainingData/Test/test.hdf5", "a")
 
         games_won = [game.values() for game in hdf["win"].values()]
         games_lost = [game.values() for game in hdf["loss"].values()]
@@ -109,12 +109,18 @@ class DataHandler:
 
         sample_files = os.listdir("./TrainingData")
         for file_name in sample_files:
-            sample_file = h5py.File("./TrainingData/" + file_name)
+            file_name = "./TrainingData/" + file_name
+            if os.path.isfile(file_name):
+                sample_file = h5py.File(file_name, "a")
 
-            for game in sample_file["win"].values():
-                if not game.name in merged_file["win"]:
-                    game.copy(source=game, dest=merged_file["win"], name=game.name)
+                if not 'win' in merged_file.keys():
+                    merged_file.create_group("win")
+                    merged_file.create_group("loss")
 
-            for game in sample_file["loss"].values():
-                if not game.name in merged_file["loss"]:
-                    game.copy(source=game, dest=merged_file["loss"], name=game.name)
+                for game in sample_file["win"].values():
+                    if not game.name in merged_file["win"]:
+                        game.copy(source=game, dest=merged_file["win"], name=game.name)
+
+                for game in sample_file["loss"].values():
+                    if not game.name in merged_file["loss"]:
+                        game.copy(source=game, dest=merged_file["loss"], name=game.name)

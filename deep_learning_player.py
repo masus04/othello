@@ -13,6 +13,7 @@ from game_ai import GameArtificialIntelligence
 # WARNING: pyTorch only supports mini batches!
 # see http://pytorch.org/tutorials/beginner/blitz/neural_networks_tutorial.html for details
 
+net = 1
 
 class DeepLearningPlayer(Player):
 
@@ -32,7 +33,8 @@ class DeepLearningPlayer(Player):
         try:
             self.model = DataHandler.load_weights(self.name)
         except Exception:
-            self.train_model(epochs=epochs, batch_size=batch_size)
+            if epochs != 0:
+                self.train_model(epochs=epochs, batch_size=batch_size)
 
     def train_model(self, epochs=10, batch_size=100, continue_training=False):
         losses = self.model.train_model(epochs=epochs, batch_size=batch_size, continue_training=continue_training)
@@ -86,51 +88,51 @@ class Net(nn.Module):
 
     def __init__(self):
         super(Net, self).__init__()
-        # '''
-        self.conv_to_linear_params_size = 16*8*8
-        self.conv1 = nn.Conv2d(in_channels= 1, out_channels=16, kernel_size=3, padding=1)
-        self.conv2 = nn.Conv2d(in_channels=16, out_channels=16, kernel_size=3, padding=1)
-        self.conv3 = nn.Conv2d(in_channels=16, out_channels=16, kernel_size=3, padding=1)
-        self.conv4 = nn.Conv2d(in_channels=16, out_channels=16, kernel_size=3, padding=1)
-        self.conv5 = nn.Conv2d(in_channels=16, out_channels=16, kernel_size=3, padding=1)
-        self.conv6 = nn.Conv2d(in_channels=16, out_channels=16, kernel_size=3, padding=1)
-        self.conv7 = nn.Conv2d(in_channels=16, out_channels=16, kernel_size=3, padding=1)
-        self.fc1 = nn.Linear(in_features=self.conv_to_linear_params_size,    out_features=self.conv_to_linear_params_size/ 4)  # Channels x Board size (was 4x4 for some reason)
-        self.fc2 = nn.Linear(in_features=self.conv_to_linear_params_size/ 4, out_features=self.conv_to_linear_params_size/ 16)
-        self.fc3 = nn.Linear(in_features=self.conv_to_linear_params_size/ 16, out_features=1)
-        # '''
 
-        '''
-        self.fc1 = nn.Linear(in_features=64, out_features=64)
-        self.fc2 = nn.Linear(in_features=64, out_features=32)
-        self.fc3 = nn.Linear(in_features=32, out_features=1)
-        '''
+        if net == 1:
+            self.conv_to_linear_params_size = 16*8*8
+            self.conv1 = nn.Conv2d(in_channels= 1, out_channels=16, kernel_size=3, padding=1)
+            self.conv2 = nn.Conv2d(in_channels=16, out_channels=16, kernel_size=3, padding=1)
+            self.conv3 = nn.Conv2d(in_channels=16, out_channels=16, kernel_size=3, padding=1)
+            self.conv4 = nn.Conv2d(in_channels=16, out_channels=16, kernel_size=3, padding=1)
+            self.conv5 = nn.Conv2d(in_channels=16, out_channels=16, kernel_size=3, padding=1)
+            self.conv6 = nn.Conv2d(in_channels=16, out_channels=16, kernel_size=3, padding=1)
+            self.conv7 = nn.Conv2d(in_channels=16, out_channels=16, kernel_size=3, padding=1)
+            self.fc1 = nn.Linear(in_features=self.conv_to_linear_params_size,    out_features=self.conv_to_linear_params_size/ 4)  # Channels x Board size (was 4x4 for some reason)
+            self.fc2 = nn.Linear(in_features=self.conv_to_linear_params_size/ 4, out_features=self.conv_to_linear_params_size/ 16)
+            self.fc3 = nn.Linear(in_features=self.conv_to_linear_params_size/ 16, out_features=1)
+
+
+        if net == 2:
+            self.fc1 = nn.Linear(in_features=64, out_features=64)
+            self.fc2 = nn.Linear(in_features=64, out_features=32)
+            self.fc3 = nn.Linear(in_features=32, out_features=1)
+
 
         self.learning_rate = 0.01
         self.criterion = torch.nn.MSELoss(size_average=False)
         # self.criterion = torch.nn.CrossEntropyLoss(weight=None, size_average=True)
 
     def forward(self, x):
-        # '''
-        x = F.relu(self.conv1(x))
-        x = F.relu(self.conv2(x))
-        x = F.relu(self.conv3(x))
-        x = F.relu(self.conv4(x))
-        x = F.relu(self.conv5(x))
-        x = F.relu(self.conv6(x))
-        x = F.relu(self.conv7(x))
-        x = x.view(-1, self.num_flat_features())
-        x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
-        x = F.sigmoid(self.fc3(x))
-        # '''
+        if net == 1:
+            x = F.relu(self.conv1(x))
+            x = F.relu(self.conv2(x))
+            x = F.relu(self.conv3(x))
+            x = F.relu(self.conv4(x))
+            x = F.relu(self.conv5(x))
+            x = F.relu(self.conv6(x))
+            x = F.relu(self.conv7(x))
+            x = x.view(-1, self.num_flat_features())
+            x = F.relu(self.fc1(x))
+            x = F.relu(self.fc2(x))
+            x = F.sigmoid(self.fc3(x))
 
-        '''
-        x = x.view(-1, 64)
-        x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
-        x = F.sigmoid(self.fc3(x))
-        '''
+        if net == 2:
+            x = x.view(-1, 64)
+            x = F.relu(self.fc1(x))
+            x = F.relu(self.fc2(x))
+            x = F.sigmoid(self.fc3(x))
+
 
         return x
 
@@ -210,6 +212,6 @@ class Net(nn.Module):
         return average_losses
 
 
-import numpy
 def get_dummy_training_data(sample_size):
-        return [(numpy.array([[i%2]*8]*8), i%2) for i in range(sample_size)]
+    import numpy
+    return [(numpy.array([[i%2]*8]*8), i%2) for i in range(sample_size)]
