@@ -12,7 +12,7 @@ def train_curriculum():
 
     start_time = time.time()
     accuracies = []
-    while (accuracies == []):
+    while (True):
         #while datetime.datetime.today().day % 2 != 0:
         #   time.sleep(3600)
 
