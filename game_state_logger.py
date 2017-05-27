@@ -71,8 +71,8 @@ class Logger:
                 game_group = hdf["loss"].create_group(group_name)
                 i = 0
 
-                for move in cls.player_moves[winner_color -1]:
-                    game_group.create_dataset("game_state_%s" % format(i, "02d"), data=np.array(move.get_representation(winner_color)))
+                for move in cls.player_moves[looser_color - 1]:
+                    game_group.create_dataset("game_state_%s" % format(i, "02d"), data=np.array(move.get_representation(looser_color)))
                     i += 1
 
                 i = -1 # break condition
@@ -82,6 +82,7 @@ class Logger:
 
         cls.player_moves = [[], []]
         cls.depth_sum = 0
+        hdf.close()
 
     @classmethod
     def report_depth(cls, depth):
