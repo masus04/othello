@@ -16,8 +16,9 @@ class Othello:
 
     # Default values, they are overridden by values in the properties file
     headless = True
-    number_of_games = 100
     timeout = 5;
+    number_of_games = 100
+
     try:
         LOG = properties.LOG
     except Exception:
@@ -92,7 +93,6 @@ class Othello:
                 if self.LOG:
                     Logger.report_winner(winner)
 
-                print "-- | Player %s won | --" % winner
                 break
             self.now_playing.set_current_board(self.board)
             if self.board.get_valid_moves(self.now_playing.color) != []:
@@ -102,20 +102,21 @@ class Othello:
             self.now_playing, self.other_player = self.other_player, self.now_playing
         if not self.headless:
             self.gui.show_winner(winner, self.board)
-        self.restart(games - 1)
 
-    def restart(self, games):
-        if games > 0:
-            if self.headless:
-                self.setup_headless_game()
-            else:
-                self.setup_game()
-            self.run(games)
+    def restart(self):
+        if self.headless:
+            self.setup_headless_game()
+        else:
+            self.setup_game()
 
 
 def main():
     game = Othello()
-    game.run(Othello.number_of_games)
+    while(game.number_of_games > 0):
+        game.run(Othello.number_of_games)
+        game.restart()
+        game.number_of_games -= 1
+
 
 if __name__ == '__main__':
     main()
