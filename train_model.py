@@ -17,7 +17,7 @@ def train_curriculum():
         #   time.sleep(3600)
 
         #losses = player.train_model(epochs=1, batch_size=10, continue_training=True)
-        losses = player.train_model_on_curriculum(epochs_per_stage=2, final_epoch=1, continue_training=True)
+        losses = player.train_model_on_curriculum(epochs_per_stage=5, final_epoch=1, continue_training=True)
         print "Training successfull, took %s" % DataHandler.format_time(time.time() - start_time)
         acc = test_network(player)
         print "Training Error / Accuracy: %s" % acc
@@ -159,6 +159,9 @@ def train_dummy(sample_size, epochs):
 
 """ --- ! Choose training mode here ! --- """
 
+DataHandler.merge_samples()
+
+""" --! Training !-- """
 # train_network()
 train_curriculum()
 # train_dummy(sample_size=16000*60 / 10, epochs=100)  # 16000 * 60 = size of our training set, so each episode is 10% of an epoch in real training
