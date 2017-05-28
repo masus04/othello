@@ -13,7 +13,7 @@ from game_ai import GameArtificialIntelligence
 # WARNING: pyTorch only supports mini batches!
 # see http://pytorch.org/tutorials/beginner/blitz/neural_networks_tutorial.html for details
 
-net = 1
+net = 2
 
 class DeepLearningPlayer(Player):
 
@@ -90,24 +90,25 @@ class Net(nn.Module):
         super(Net, self).__init__()
 
         if net == 1:
-            self.conv_to_linear_params_size = 16*8*8
-            self.conv1 = nn.Conv2d(in_channels= 1, out_channels=16, kernel_size=3, padding=1)
-            self.conv2 = nn.Conv2d(in_channels=16, out_channels=16, kernel_size=3, padding=1)
-            self.conv3 = nn.Conv2d(in_channels=16, out_channels=16, kernel_size=3, padding=1)
-            self.conv4 = nn.Conv2d(in_channels=16, out_channels=16, kernel_size=3, padding=1)
-            self.conv5 = nn.Conv2d(in_channels=16, out_channels=16, kernel_size=3, padding=1)
-            self.conv6 = nn.Conv2d(in_channels=16, out_channels=16, kernel_size=3, padding=1)
-            self.conv7 = nn.Conv2d(in_channels=16, out_channels=16, kernel_size=3, padding=1)
+            conv_channels = 8
+            self.conv_to_linear_params_size = conv_channels*8*8
+            self.conv1 = nn.Conv2d(in_channels= 1, out_channels=conv_channels, kernel_size=3, padding=1)
+            self.conv2 = nn.Conv2d(in_channels=conv_channels, out_channels=conv_channels, kernel_size=3, padding=1)
+            self.conv3 = nn.Conv2d(in_channels=conv_channels, out_channels=conv_channels, kernel_size=3, padding=1)
+            self.conv4 = nn.Conv2d(in_channels=conv_channels, out_channels=conv_channels, kernel_size=3, padding=1)
+            self.conv5 = nn.Conv2d(in_channels=conv_channels, out_channels=conv_channels, kernel_size=3, padding=1)
+            self.conv6 = nn.Conv2d(in_channels=conv_channels, out_channels=conv_channels, kernel_size=3, padding=1)
+            self.conv7 = nn.Conv2d(in_channels=conv_channels, out_channels=conv_channels, kernel_size=3, padding=1)
             self.fc1 = nn.Linear(in_features=self.conv_to_linear_params_size,    out_features=self.conv_to_linear_params_size/ 4)  # Channels x Board size (was 4x4 for some reason)
-            self.fc2 = nn.Linear(in_features=self.conv_to_linear_params_size/ 4, out_features=self.conv_to_linear_params_size/ 16)
-            self.fc3 = nn.Linear(in_features=self.conv_to_linear_params_size/ 16, out_features=1)
-
+            self.fc2 = nn.Linear(in_features=self.conv_to_linear_params_size/ 4, out_features=self.conv_to_linear_params_size/16)
+            self.fc3 = nn.Linear(in_features=self.conv_to_linear_params_size/16, out_features=1)
 
         if net == 2:
             self.fc1 = nn.Linear(in_features=64, out_features=64)
-            self.fc2 = nn.Linear(in_features=64, out_features=32)
-            self.fc3 = nn.Linear(in_features=32, out_features=1)
-
+            self.fc2 = nn.Linear(in_features=64, out_features=64)
+            self.fc3 = nn.Linear(in_features=64, out_features=64)
+            self.fc4 = nn.Linear(in_features=64, out_features=32)
+            self.fc5 = nn.Linear(in_features=32, out_features=1)
 
         self.learning_rate = 0.01
         self.criterion = torch.nn.MSELoss(size_average=False)
@@ -125,13 +126,15 @@ class Net(nn.Module):
             x = x.view(-1, self.num_flat_features())
             x = F.relu(self.fc1(x))
             x = F.relu(self.fc2(x))
-            x = F.sigmoid(self.fc3(x))
+            x = (self.fc3(x))
 
         if net == 2:
             x = x.view(-1, 64)
             x = F.relu(self.fc1(x))
             x = F.relu(self.fc2(x))
-            x = F.sigmoid(self.fc3(x))
+            x = F.relu(self.fc3(x))
+            x = F.relu(self.fc4(x))
+            x = F.sigmoid(self.fc5(x))
 
 
         return x

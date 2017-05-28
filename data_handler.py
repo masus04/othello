@@ -48,7 +48,7 @@ class DataHandler:
             random.shuffle(training_data)
 
         #print "successfully loaded %i training samples" % len(training_data)
-        return training_data
+        return DataHandler.transform_to_positive(training_data)
 
     @classmethod
     def get_curriculum_training_data(cls, iteration):
@@ -65,10 +65,10 @@ class DataHandler:
             training_data.extend([(sample.value, cls.WIN) for sample in game_won if str(iteration) in sample.name])
             training_data.extend([(sample.value, cls.LOSS) for sample in game_lost if str(iteration) in sample.name])
 
-        return training_data
+        return DataHandler.transform_to_positive(training_data)
 
     @classmethod
-    def get_test_data(self):
+    def get_test_data(cls):
         hdf = h5py.File("./TrainingData/Test/test.hdf5", "a")
 
         games_won = [game.values() for game in hdf["win"].values()]
@@ -76,7 +76,7 @@ class DataHandler:
 
         test_data = [(item.value, 1) for sublist in games_won for item in sublist]
         test_data.extend([(item.value, 0) for sublist in games_lost for item in sublist])
-        return test_data
+        return cls.transform_to_positive(test_data)
 
     @classmethod
     def store_weights(cls, player_name, model):
@@ -111,7 +111,7 @@ class DataHandler:
         for file_name in sample_files:
             file_name = "./TrainingData/" + file_name
             if os.path.isfile(file_name):
-                sample_file = h5py.File(file_name, "a")
+                sample_file = h5py.File(file_name, "r")
 
                 if not 'win' in merged_file.keys():
                     merged_file.create_group("win")
@@ -124,3 +124,47 @@ class DataHandler:
                 for game in sample_file["loss"].values():
                     if not game.name in merged_file["loss"]:
                         game.copy(source=game, dest=merged_file["loss"], name=game.name)
+
+    @classmethod
+    def transform_to_positive(cls, training_data):
+        return [(positive_board(sample[0]), sample[1]) for sample in training_data]
+
+    @classmethod
+    def generate_positive_training_data(cls):
+        samples = h5py.File("./TrainingData/samples.hdf5", "r")
+        positive_samples = h5py.File("./TrainingData/positive_samples.hdf5", "a")
+        if not 'win' in positive_samples.keys():
+            positive_samples.create_group("win")
+            positive_samples.create_group("loss")
+
+        for game in samples["win"].values():
+            if not game.name in positive_samples["win"]:
+                positive_samples.create_group(game.name)
+                for state in game.values():
+                    positive_samples.create_dataset(name=state.name, data=positive_board(state.value))
+
+            if not game.name in positive_samples["loss"]:
+                positive_samples.create_group(game.name)
+                for state in game.values():
+                    positive_samples.create_dataset(name=state.name, data=positive_board(state.value))
+
+
+        samples.close()
+        positive_samples.close()
+
+
+def positive_board(board_state):
+    from copy import deepcopy
+    positive = deepcopy(board_state)
+
+    for i in range(8):
+        for j in range(8):
+            if positive[i][j] < 0:
+                positive[i][j] = 3
+
+            elif positive[i][j] == 0:
+                positive[i][j] = 2
+
+    return positive
+
+DataHandler.generate_positive_training_data()
