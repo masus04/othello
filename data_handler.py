@@ -15,11 +15,14 @@ class DataHandler:
 
     @classmethod
     def init_training_data(cls):
+        try:
+            hdf = h5py.File("./TrainingData/samples.hdf5", "a")
+        except Exception:
+            cls.merge_samples()
 
         try:
             cls.games_won and cls.games_lost and cls.games and cls.test_games_won and cls.test_games_lost
         except Exception:
-            hdf = h5py.File("./TrainingData/samples.hdf5", "a")
             cls.games_won = [game.values() for game in hdf["win"].values()]
             cls.games_lost = [game.values() for game in hdf["loss"].values()]
             cls.games = zip(cls.games_won, cls.games_lost)
