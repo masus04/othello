@@ -18,5 +18,5 @@ crashlytics-build.properties
 fabric.properties
 
 # training data and weights are too big to push to git
-TrainingData/
+# TrainingData/
 Weights/
