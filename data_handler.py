@@ -180,4 +180,4 @@ def positive_board(board_state):
 
     return positive
 
-DataHandler.generate_positive_training_data()
+# DataHandler.generate_positive_training_data()
