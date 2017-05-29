@@ -6,8 +6,7 @@ from config import WHITE, BLACK
 from torch import FloatTensor
 from torch.autograd import Variable
 
-def test_network(player):
-    test_data = DataHandler.get_test_data()
+def test_network(player, test_data):
 
     score = 0.0
     for sample in test_data:

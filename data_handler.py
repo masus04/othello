@@ -11,17 +11,26 @@ class DataHandler:
 
     def __init__(self):
         print "Initializing DataHandler"
-        self.__load_training_data__()
+        self.init_training_data()
 
     @classmethod
-    def __load_training_data__(self):
+    def init_training_data(cls):
 
-        hdf = h5py.File("./TrainingData/samples.hdf5", "a")
+        try:
+            cls.games_won and cls.games_lost and cls.games and cls.test_games_won and cls.test_games_lost
+        except Exception:
+            hdf = h5py.File("./TrainingData/samples.hdf5", "a")
+            cls.games_won = [game.values() for game in hdf["win"].values()]
+            cls.games_lost = [game.values() for game in hdf["loss"].values()]
+            cls.games = zip(cls.games_won, cls.games_lost)
 
-        self.games_won = [game.values() for game in hdf["win"].values()]
-        self.games_lost = [game.values() for game in hdf["loss"].values()]
+            hdf = h5py.File("./TrainingData/Test/test.hdf5", "a")
+            cls.test = {}
+            cls.test_games_won = [game.values() for game in hdf["win"].values()]
+            cls.test_games_lost = [game.values() for game in hdf["loss"].values()]
+            cls.test_games = zip(cls.test_games_won, cls.test_games_lost)
 
-        print "Successfully loaded %i games" % (len(self.games_won) + len(self.games_lost))
+            print "Successfully loaded %i games" % (len(cls.games_won) + len(cls.games_lost))
 
     @classmethod
     def get_training_data(cls, batch_size=100, shuffle=False):
@@ -30,15 +39,10 @@ class DataHandler:
         :batch_size: the number of board states to be randomly chosen from each game"""
 
         # --------------------------------------------------------
-        try:
-            cls.games_won and cls.games_lost
-        except Exception:
-            cls.__load_training_data__()
-
-        games = zip(cls.games_won, cls.games_lost)
+        cls.init_training_data()
 
         training_data = []
-        for game_won, game_lost in games:
+        for game_won, game_lost in cls.games:
             training_data.extend([(sample.value, cls.WIN) for sample in random.sample(game_won, min(batch_size, len(game_won)))])
             training_data.extend([(sample.value, cls.LOSS) for sample in random.sample(game_lost, min(batch_size, len(game_lost)))])
 
@@ -51,31 +55,37 @@ class DataHandler:
         return DataHandler.transform_to_positive(training_data)
 
     @classmethod
+    def get_test_data(cls):
+
+        cls.init_training_data()
+
+        test_data = [(item.value, 1) for sublist in cls.test_games_won for item in sublist]
+        test_data.extend([(item.value, 0) for sublist in cls.test_games_lost for item in sublist])
+
+        return cls.transform_to_positive(test_data)
+
+    @classmethod
     def get_curriculum_training_data(cls, iteration):
 
+        cls.init_training_data()
+
         training_data = []
-        try:
-            cls.games_won and cls.games_lost
-        except Exception:
-            cls.__load_training_data__()
-
-        games = zip(cls.games_won, cls.games_lost)
-
-        for game_won, game_lost in games:
+        for game_won, game_lost in cls.games:
             training_data.extend([(sample.value, cls.WIN) for sample in game_won if str(iteration) in sample.name])
             training_data.extend([(sample.value, cls.LOSS) for sample in game_lost if str(iteration) in sample.name])
 
-        return DataHandler.transform_to_positive(training_data)
+        return cls.transform_to_positive(training_data)
 
     @classmethod
-    def get_test_data(cls):
-        hdf = h5py.File("./TrainingData/Test/test.hdf5", "a")
+    def get_curriculum_test_data(cls, iteration):
 
-        games_won = [game.values() for game in hdf["win"].values()]
-        games_lost = [game.values() for game in hdf["loss"].values()]
+        cls.init_training_data()
 
-        test_data = [(item.value, 1) for sublist in games_won for item in sublist]
-        test_data.extend([(item.value, 0) for sublist in games_lost for item in sublist])
+        test_data = []
+        for game_won, game_lost in cls.test_games:
+            test_data.extend([(sample.value, cls.WIN) for sample in game_won if str(iteration) in sample.name])
+            test_data.extend([(sample.value, cls.LOSS) for sample in game_lost if str(iteration) in sample.name])
+
         return cls.transform_to_positive(test_data)
 
     @classmethod
