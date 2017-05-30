@@ -41,9 +41,9 @@ class Othello:
     def setup_headless_game(self):
         self.headless = True
         # player one, same as in game_state_logger.py
-        self.now_playing = player.ComputerPlayer(color=BLACK, time_limit=self.timeout, headless=self.headless, strategy=randint(0, 3))
+        self.now_playing = player.RandomPlayer(color=BLACK, time_limit=self.timeout, headless=self.headless)
         # player two, same as in game_state_logger.py
-        self.other_player = player.ComputerPlayer(color=WHITE, time_limit=self.timeout, headless=self.headless, strategy=randint(0, 3))
+        self.other_player = DeepLearningPlayer(color=WHITE, time_limit=self.timeout, headless=self.headless, epochs=0)
         # self.other_player = DeepLearningPlayer(color=WHITE, time_limit=self.timeout, headless=self.headless)
         self.board = board.Board()
         Logger.set_player_names([self.now_playing.name, self.other_player.name])

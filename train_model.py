@@ -13,15 +13,15 @@ def train_curriculum():
     start_time = time.time()
     accuracies = []
     i = 0
-    while (i<200):
+    while (i<20):
         i
         #while datetime.datetime.today().day % 2 != 0:
         #   time.sleep(3600)
 
         #losses = player.train_model(epochs=1, batch_size=10, continue_training=True)
-        losses = player.train_model_on_curriculum(epochs_per_stage=20, final_epoch=1, continue_training=True)
+        losses = player.train_model_on_curriculum(epochs_per_stage=1, final_epoch=1, continue_training=True)
         print "Training successfull, took %s" % DataHandler.format_time(time.time() - start_time)
-        test_set = zip(DataHandler.get_curriculum_training_data(0), DataHandler.get_curriculum_test_data(1))
+        test_set = DataHandler.get_curriculum_training_data(0)
         acc = test_network(player=player, test_data=test_set)
         print "Training Error / Accuracy: %s" % acc
         accuracies.append(acc)

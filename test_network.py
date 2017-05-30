@@ -9,14 +9,16 @@ from torch.autograd import Variable
 def test_network(player, test_data):
 
     score = 0.0
-    for sample in test_data:
+    for index, sample in enumerate(test_data):
         prediction = player.evaluate_board(Board(sample[0]), WHITE, BLACK)
         prediction = prediction.data.numpy()[0][0]
 
         if (prediction > 0.5) == (sample[1] == 1):
             score += 1
 
-        # print "predicting: %s, score: %s" % (prediction, score)
+        if float(index)/len(test_data) % 1 == 0:
+            print "Evaluating network: %s%% done" % str(index/len(test_data))
+            # print "predicting: %s, score: %s" % (prediction, score)
 
 
     # print "score: %s" % score
@@ -24,5 +26,5 @@ def test_network(player, test_data):
     
     return score/len(test_data)
 
-# player = DeepLearningPlayer(color=WHITE, time_limit=1, headless=True, epochs=1, batch_size=100)
-# test_network(player)
+player = DeepLearningPlayer(color=WHITE, time_limit=1, headless=True, epochs=0, batch_size=100)
+print "Evaluation error: %s" % str(test_network(player, DataHandler.get_curriculum_test_data(0)))

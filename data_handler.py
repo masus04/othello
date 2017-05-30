@@ -3,6 +3,7 @@ import h5py
 import os
 import torch
 import numpy
+import time
 
 class DataHandler:
 
@@ -23,15 +24,20 @@ class DataHandler:
         try:
             cls.games_won and cls.games_lost and cls.games and cls.test_games_won and cls.test_games_lost
         except Exception:
+            print "loading training data"
+            loading_time = time.time()
             cls.games_won = [game.values() for game in hdf["win"].values()]
             cls.games_lost = [game.values() for game in hdf["loss"].values()]
             cls.games = zip(cls.games_won, cls.games_lost)
+            print "training data loaded, took %s" % DataHandler.format_time(loading_time - time.time())
 
+            loading_time = time.time()
             hdf = h5py.File("./TrainingData/Test/test.hdf5", "a")
             cls.test = {}
             cls.test_games_won = [game.values() for game in hdf["win"].values()]
             cls.test_games_lost = [game.values() for game in hdf["loss"].values()]
             cls.test_games = zip(cls.test_games_won, cls.test_games_lost)
+            print "test data loaded, took %s" % DataHandler.format_time(loading_time - time.time())
 
             print "Successfully loaded %i games" % (len(cls.games_won) + len(cls.games_lost))
 
